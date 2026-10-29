@@ -46,7 +46,7 @@ export function Arcade() {
   return (
     <section id="arcade" className="relative py-28 md:py-36">
       <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-transparent via-bg-2/60 to-transparent" />
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+      <div className="mx-auto max-w-site px-4 sm:px-6 lg:px-10">
         <SectionHeading
           index="05"
           kicker="The Loop Arcade"

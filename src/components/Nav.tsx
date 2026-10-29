@@ -56,7 +56,7 @@ export function Nav() {
     <>
       <header className="fixed inset-x-0 top-0 z-50 flex justify-center px-3 pt-3 sm:px-4">
         <nav
-          className={`flex w-full max-w-6xl items-center gap-2 rounded-2xl px-2.5 py-2 transition-all duration-500 ${
+          className={`flex w-full max-w-site items-center gap-2 rounded-2xl px-2.5 py-2 transition-all duration-500 ${
             scrolled ? "glass shadow-[0_10px_40px_-10px_rgb(0_0_0/0.5)]" : "border border-transparent"
           }`}
         >

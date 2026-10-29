@@ -13,7 +13,7 @@ const C = ({ children }: { children: React.ReactNode }) => <span className="text
 
 export function About() {
   return (
-    <section id="about" className="relative mx-auto max-w-6xl px-4 py-28 sm:px-6 md:py-36">
+    <section id="about" className="relative mx-auto max-w-site px-4 py-28 sm:px-6 md:py-36 lg:px-10">
       <SectionHeading
         index="01"
         kicker="About"

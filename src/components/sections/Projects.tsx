@@ -28,7 +28,7 @@ export function Projects() {
   }, [open]);
 
   return (
-    <section id="work" className="relative mx-auto max-w-6xl px-4 py-28 sm:px-6 md:py-36">
+    <section id="work" className="relative mx-auto max-w-site px-4 py-28 sm:px-6 md:py-36 lg:px-10">
       <SectionHeading
         index="03"
         kicker="Selected work"

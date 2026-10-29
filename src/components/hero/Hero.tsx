@@ -21,12 +21,13 @@ export function Hero() {
         className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-bg to-transparent"
       />
 
-      <div className="relative mx-auto w-full max-w-6xl px-4 pb-24 pt-[44vh] sm:px-6 md:pt-28">
+      <div className="relative mx-auto w-full max-w-site px-4 pb-24 pt-[44vh] sm:px-6 md:pb-20 md:pt-28 lg:px-10">
         <VisitorLine />
 
-        <h1 className="font-display font-extrabold leading-[0.82] tracking-[-0.04em]">
+        {/* One line on large screens, sized by height too so the whole hero fits the first screen. */}
+        <h1 className="font-display font-extrabold leading-[0.82] tracking-[-0.04em] lg:whitespace-nowrap">
           <motion.span
-            className="block text-[clamp(4.2rem,15vw,11.5rem)]"
+            className="block text-[clamp(4.2rem,15vw,11.5rem)] lg:inline-block lg:text-[min(10.5vw,22svh,12rem)]"
             initial={{ opacity: 0, y: 60 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.15, ease }}
@@ -34,7 +35,7 @@ export function Hero() {
             {profile.firstName}
           </motion.span>
           <motion.span
-            className="block text-[clamp(4.2rem,15vw,11.5rem)]"
+            className="block text-[clamp(4.2rem,15vw,11.5rem)] lg:ml-[0.22em] lg:inline-block lg:text-[min(10.5vw,22svh,12rem)]"
             initial={{ opacity: 0, y: 60 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.28, ease }}
@@ -44,72 +45,57 @@ export function Hero() {
           </motion.span>
         </h1>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5, ease }}
-          className="mt-8 max-w-xl"
-        >
-          <p className="font-display text-2xl font-medium leading-snug sm:text-3xl">
-            Full-stack developer.
-            <br />I build <RoleTicker />
-          </p>
-          <p className="mt-4 text-base text-muted sm:text-lg">
-            Freelance developer from Amritsar, now doing an MSc in Computer Science at GNDU. I work across the whole stack: Next.js
-            frontends, NestJS APIs, React Native apps and custom WordPress builds.
-          </p>
-        </motion.div>
+        <div className="mt-8 grid gap-10 lg:mt-10 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:items-end lg:gap-16">
+          <div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.5, ease }}
+              className="max-w-2xl"
+            >
+              <p className="font-display text-2xl font-medium leading-snug sm:text-3xl">
+                Full-stack developer.
+                <br />I build <RoleTicker />
+              </p>
+              <p className="mt-4 text-base text-muted sm:text-lg">
+                Freelance developer from Amritsar, now doing an MSc in Computer Science at GNDU. I work across the whole stack:
+                Next.js frontends, NestJS APIs, React Native apps and custom WordPress builds.
+              </p>
+            </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.65, ease }}
-          className="mt-9 flex flex-wrap items-center gap-3"
-        >
-          <a
-            href="#work"
-            className="group inline-flex items-center gap-2 rounded-full bg-fg px-6 py-3.5 text-sm font-semibold text-bg transition hover:scale-[1.03]"
-          >
-            See my work
-            <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-          </a>
-          <a
-            href="#arcade"
-            className="group inline-flex items-center gap-2 rounded-full border border-line bg-surface px-6 py-3.5 text-sm font-semibold backdrop-blur transition hover:border-accent"
-          >
-            <Gamepad2 className="h-4 w-4 text-accent transition-transform group-hover:rotate-12" />
-            Play the arcade
-          </a>
-          <button
-            onClick={openPalette}
-            className="hidden items-center gap-2 px-3 py-3.5 font-mono text-xs text-muted transition hover:text-fg sm:inline-flex"
-          >
-            or press <kbd className="rounded-md border border-line px-1.5 py-0.5">Ctrl</kbd>
-            <kbd className="rounded-md border border-line px-1.5 py-0.5">K</kbd>
-          </button>
-        </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.65, ease }}
+              className="mt-8 flex flex-wrap items-center gap-3"
+            >
+              <a
+                href="#work"
+                className="group inline-flex items-center gap-2 rounded-full bg-fg px-6 py-3.5 text-sm font-semibold text-bg transition hover:scale-[1.03]"
+              >
+                See my work
+                <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              </a>
+              <a
+                href="#arcade"
+                className="group inline-flex items-center gap-2 rounded-full border border-line bg-surface px-6 py-3.5 text-sm font-semibold backdrop-blur transition hover:border-accent"
+              >
+                <Gamepad2 className="h-4 w-4 text-accent transition-transform group-hover:rotate-12" />
+                Play the arcade
+              </a>
+              <button
+                onClick={openPalette}
+                className="hidden items-center gap-2 px-3 py-3.5 font-mono text-xs text-muted transition hover:text-fg sm:inline-flex"
+              >
+                or press <kbd className="rounded-md border border-line px-1.5 py-0.5">Ctrl</kbd>
+                <kbd className="rounded-md border border-line px-1.5 py-0.5">K</kbd>
+              </button>
+            </motion.div>
+          </div>
 
-        <motion.dl
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.9 }}
-          className="mt-14 grid max-w-2xl grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4"
-        >
-          {[
-            ["9+", "projects shipped"],
-            ["20+", "HR modules built"],
-            ["3", "platforms: web, iOS, Android"],
-            ["5", "arcade games below"],
-          ].map(([n, l]) => (
-            <div key={l} className="border-l border-line pl-4">
-              <dt className="font-display text-3xl font-bold">{n}</dt>
-              <dd className="text-xs leading-snug text-muted">{l}</dd>
-            </div>
-          ))}
-        </motion.dl>
+          <StatusCard />
+        </div>
       </div>
-
-      <StatusCard />
 
       <a
         href="#about"
@@ -173,20 +159,37 @@ function VisitorLine() {
 function StatusCard() {
   return (
     <motion.div
-      initial={{ opacity: 0, x: 30 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.9, delay: 1.1, ease }}
-      className="glass animate-float absolute bottom-24 right-6 hidden w-64 rounded-2xl p-4 xl:block"
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.9, delay: 0.8, ease }}
+      className="glass w-full max-w-xl rounded-3xl p-5 sm:p-6 lg:ml-auto"
     >
-      <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-success">
-        <span className="h-1.5 w-1.5 rounded-full bg-success" /> available for freelance
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-success">
+          <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse-ring" /> available for freelance
+        </div>
+        <p className="flex items-center gap-1 text-xs text-muted">
+          <MapPin className="h-3 w-3" /> {profile.location}
+        </p>
       </div>
       <p className="mt-3 text-sm font-semibold">Currently: MSc Computer Science @ GNDU</p>
-      <p className="mt-1 flex items-center gap-1 text-xs text-muted">
-        <MapPin className="h-3 w-3" /> {profile.location}
-      </p>
-      <div className="mt-3 flex flex-wrap gap-1">
-        {allTech.slice(0, 5).map((t) => (
+
+      <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-4 border-t border-line pt-5">
+        {[
+          ["9+", "projects shipped"],
+          ["20+", "HR modules built"],
+          ["3", "platforms: web, iOS, Android"],
+          ["5", "arcade games below"],
+        ].map(([n, l]) => (
+          <div key={l} className="border-l border-line pl-4">
+            <dt className="font-display text-3xl font-bold">{n}</dt>
+            <dd className="text-xs leading-snug text-muted">{l}</dd>
+          </div>
+        ))}
+      </dl>
+
+      <div className="mt-5 flex flex-wrap gap-1">
+        {allTech.slice(0, 6).map((t) => (
           <span key={t} className="rounded-md bg-surface-2 px-1.5 py-0.5 font-mono text-[10px] text-muted">
             {t}
           </span>

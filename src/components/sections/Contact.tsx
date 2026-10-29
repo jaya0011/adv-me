@@ -45,7 +45,7 @@ export function Contact() {
   ];
 
   return (
-    <section id="contact" className="relative mx-auto max-w-6xl px-4 py-28 sm:px-6 md:py-36">
+    <section id="contact" className="relative mx-auto max-w-site px-4 py-28 sm:px-6 md:py-36 lg:px-10">
       <Reveal>
         <div className="mb-4 flex items-center gap-3 font-mono text-xs uppercase tracking-[0.25em] text-muted">
           <span className="text-accent">06</span>
@@ -162,7 +162,7 @@ export function Footer() {
   const visits = useLoop((s) => s.visits);
   return (
     <footer className="relative border-t border-line">
-      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-10 text-sm text-muted sm:flex-row sm:px-6">
+      <div className="mx-auto flex max-w-site flex-col items-center justify-between gap-4 px-4 py-10 text-sm text-muted sm:flex-row sm:px-6 lg:px-10">
         <div className="flex items-center gap-3">
           <LoopMark className="h-4 w-8 text-accent" />
           <span>© {profile.name}. Designed &amp; built in Amritsar.</span>

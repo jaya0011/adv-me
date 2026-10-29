@@ -114,6 +114,7 @@
   --font-display: var(--font-bricolage);
   --font-sans: var(--font-dm);
   --font-mono: var(--font-jetbrains);
+  --container-site: 88rem;
 }
 
 /* ---------- base ---------- */
