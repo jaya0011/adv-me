@@ -45,21 +45,25 @@ export function Contact() {
   ];
 
   return (
-    <section id="contact" className="relative mx-auto max-w-site px-4 py-28 sm:px-6 md:py-36 lg:px-10">
+    <section
+      id="contact"
+      className="relative mx-auto flex max-w-site flex-col justify-center px-4 py-28 sm:px-6 md:py-36 lg:min-h-[calc(100svh-5rem)] lg:px-10 lg:py-10"
+    >
       <Reveal>
         <div className="mb-4 flex items-center gap-3 font-mono text-xs uppercase tracking-[0.25em] text-muted">
           <span className="text-accent">06</span>
           <span className="h-px w-10 bg-line" />
           Contact
         </div>
-        <h2 className="font-display text-[clamp(2.8rem,9vw,7.5rem)] font-extrabold leading-[0.9] tracking-[-0.04em]">
+        {/* scales with viewport height too, so heading + form fit one screen */}
+        <h2 className="font-display text-[clamp(2.6rem,min(9vw,9vh),6.5rem)] font-extrabold leading-[0.9] tracking-[-0.04em]">
           Got an idea?
           <br />
           <span className="text-gradient">Let&apos;s put it on loop.</span>
         </h2>
       </Reveal>
 
-      <div className="mt-14 grid gap-6 lg:grid-cols-[1fr_1.1fr]">
+      <div className="mt-10 grid gap-6 lg:mt-[min(2.5rem,4vh)] lg:grid-cols-[1fr_1.1fr]">
         <Reveal>
           <div className="flex h-full flex-col gap-4">
             <div className="card p-6">
@@ -105,7 +109,7 @@ export function Contact() {
         </Reveal>
 
         <Reveal delay={0.1}>
-          <form onSubmit={send} className="card flex h-full flex-col gap-4 p-6">
+          <form onSubmit={send} className="card flex h-full flex-col gap-3.5 p-6 lg:p-5">
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted">Quick project brief</p>
             <label className="block">
               <span className="mb-1.5 block text-sm text-muted">Your name</span>
@@ -113,7 +117,7 @@ export function Contact() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Who's asking?"
-                className="w-full rounded-xl border border-line bg-surface px-4 py-3 outline-none transition placeholder:text-muted/60 focus:border-accent"
+                className="w-full rounded-xl border border-line bg-surface px-4 py-2.5 outline-none transition placeholder:text-muted/60 focus:border-accent"
               />
             </label>
             <fieldset>
@@ -124,7 +128,7 @@ export function Contact() {
                     type="button"
                     key={t}
                     onClick={() => setType(t)}
-                    className={`rounded-full border px-3.5 py-1.5 text-sm transition ${
+                    className={`rounded-full border px-3 py-1 text-sm transition ${
                       type === t ? "border-accent bg-accent text-on-accent" : "border-line hover:border-accent"
                     }`}
                   >
@@ -139,14 +143,14 @@ export function Contact() {
                 required
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                rows={5}
+                rows={3}
                 placeholder="Goals, timeline, links, anything helps."
-                className="h-full min-h-32 w-full resize-none rounded-xl border border-line bg-surface px-4 py-3 outline-none transition placeholder:text-muted/60 focus:border-accent"
+                className="h-full min-h-24 w-full resize-none rounded-xl border border-line bg-surface px-4 py-3 outline-none transition placeholder:text-muted/60 focus:border-accent"
               />
             </label>
             <button
               type="submit"
-              className="group inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-accent to-accent-3 px-5 py-3.5 font-semibold text-on-accent transition hover:brightness-110"
+              className="group inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-accent to-accent-3 px-5 py-3 font-semibold text-on-accent transition hover:brightness-110"
             >
               Send via email <Send className="h-4 w-4 transition-transform group-hover:translate-x-1 group-hover:-translate-y-0.5" />
             </button>
