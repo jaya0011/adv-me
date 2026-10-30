@@ -1,14 +1,24 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, ArrowUpRight, Check, Clock, X } from "lucide-react";
-import { AnimatePresence, LayoutGroup, motion } from "motion/react";
-import { useCallback, useEffect, useState } from "react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, X } from "lucide-react";
+import { AnimatePresence, LayoutGroup, motion, useMotionValueEvent, useScroll } from "motion/react";
+import Image from "next/image";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { categories, projects, type Category, type Project } from "@/data/portfolio";
 import { openedProject, sfx, useHydrated, useLoop } from "@/lib/store";
 import { ICONS } from "../ui/icons";
-import { Reveal, SectionHeading, trackSpotlight } from "../ui/Reveal";
+import { Eyebrow } from "../ui/Reveal";
 
 const domainOf = (url?: string) => (url ? url.replace(/^https?:\/\//, "").replace(/\/.*$/, "") : "private build");
+const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
+
+/** Eases each step so a project holds still in front of you before the next rushes in. */
+const hold = (v: number) => {
+  const whole = Math.floor(v);
+  const f = v - whole;
+  const k = clamp((f - 0.5) / 0.5, 0, 1);
+  return whole + k * k * (3 - 2 * k);
+};
 
 export function Projects() {
   const [filter, setFilter] = useState<"All" | Category>("All");
@@ -28,50 +38,139 @@ export function Projects() {
   }, [open]);
 
   return (
-    <section id="work" className="relative mx-auto max-w-site px-4 py-28 sm:px-6 md:py-36 lg:px-10">
-      <SectionHeading
-        index="03"
-        kicker="Selected work"
-        title={
-          <>
-            Things I&apos;ve <span className="text-gradient">built and shipped.</span>
-          </>
-        }
-        sub="Ecommerce, SaaS, healthcare, edtech and business websites. Open any card for the full case file."
-      />
-
-      <Reveal>
-        <div className="mb-8 flex flex-wrap items-center gap-2">
-          <LayoutGroup>
-            {categories.map((c) => (
-              <button
-                key={c}
-                onClick={() => setFilter(c)}
-                className={`relative rounded-full px-4 py-2 text-sm transition-colors ${filter === c ? "text-on-accent" : "text-muted hover:text-fg"}`}
-              >
-                {filter === c && (
-                  <motion.span layoutId="filter-pill" className="absolute inset-0 -z-10 rounded-full bg-accent" transition={{ type: "spring", stiffness: 420, damping: 34 }} />
-                )}
-                {c}
-              </button>
-            ))}
-          </LayoutGroup>
-          <CaseCounter />
-        </div>
-      </Reveal>
-
-      <motion.div layout className="grid grid-flow-dense gap-5 md:grid-cols-2 lg:grid-cols-3">
-        <AnimatePresence mode="popLayout">
-          {shown.map((p, i) => (
-            <ProjectCard key={p.id} project={p} index={projects.indexOf(p)} delay={i * 0.04} onOpen={() => open(p.id)} />
-          ))}
-        </AnimatePresence>
-      </motion.div>
-
-      <AnimatePresence>
-        {openId && <ProjectDrawer id={openId} onClose={() => setOpenId(null)} onNavigate={open} />}
-      </AnimatePresence>
+    <section id="work" data-chapter="work" className="relative">
+      <Flight key={filter} shown={shown} filter={filter} setFilter={setFilter} onOpen={open} />
+      <AnimatePresence>{openId && <ProjectDrawer id={openId} onClose={() => setOpenId(null)} onNavigate={open} />}</AnimatePresence>
     </section>
+  );
+}
+
+/** Scroll flies you down the tunnel; each project comes out of the dark and goes past you. */
+function Flight({
+  shown,
+  filter,
+  setFilter,
+  onOpen,
+}: {
+  shown: Project[];
+  filter: "All" | Category;
+  setFilter: (c: "All" | Category) => void;
+  onOpen: (id: string) => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const cards = useRef<(HTMLDivElement | null)[]>([]);
+  const [current, setCurrent] = useState(0);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
+
+  const place = useCallback(
+    (p: number) => {
+      const n = shown.length;
+      const at = hold(p * Math.max(0, n - 1) * 0.9999);
+      cards.current.forEach((el, i) => {
+        if (!el) return;
+        const f = at - i; // <0 still ahead in the dark, 0 in front of you, >0 gone past
+        const side = i % 2 ? 1 : -1;
+        const z = f < 0 ? f * 1500 : f * 1300;
+        const x = clamp(-f, 0, 2) * side * 22;
+        const rot = clamp(f, -1, 1) * side * -16;
+        const fade = f < 0 ? clamp(1 + f / 2.4, 0, 1) : clamp(1 - f / 0.55, 0, 1);
+        el.style.transform = `translate(-50%, -50%) translate3d(${x}vw, ${Math.abs(f) * 2}vh, ${z}px) rotateY(${rot}deg)`;
+        el.style.opacity = String(fade);
+        el.style.pointerEvents = Math.abs(f) < 0.4 ? "auto" : "none";
+        el.style.visibility = fade <= 0.001 ? "hidden" : "visible";
+        el.style.zIndex = String(100 - Math.round(Math.abs(f) * 10));
+      });
+      setCurrent(clamp(Math.round(at), 0, n - 1));
+    },
+    [shown.length],
+  );
+
+  useMotionValueEvent(scrollYProgress, "change", place);
+  useEffect(() => {
+    // first paint, and every time a filter swaps the deck
+    const id = requestAnimationFrame(() => place(scrollYProgress.get()));
+    return () => cancelAnimationFrame(id);
+  }, [place, scrollYProgress]);
+
+  const p = shown[current];
+
+  return (
+    <div ref={ref} className="relative" style={{ height: `${shown.length * 95 + 60}vh` }}>
+      <div
+        className="sticky top-0 h-[100svh] overflow-hidden"
+        onPointerMove={(e) => {
+          if (e.pointerType !== "mouse") return;
+          const s = e.currentTarget.style;
+          s.setProperty("--tx", ((e.clientX / window.innerWidth - 0.5) * 9).toFixed(2));
+          s.setProperty("--ty", ((e.clientY / window.innerHeight - 0.5) * -7).toFixed(2));
+          s.setProperty("--sx", `${((e.clientX / window.innerWidth) * 100).toFixed(1)}%`);
+          s.setProperty("--sy", `${((e.clientY / window.innerHeight) * 100).toFixed(1)}%`);
+        }}
+      >
+        <div className="absolute inset-x-0 top-0 z-[200] flex flex-wrap items-center justify-between gap-x-6 gap-y-2 bg-gradient-to-b from-bg via-bg/70 to-transparent px-5 pb-8 pt-20 sm:px-8 lg:px-10">
+          <Eyebrow numeral="IV">The work</Eyebrow>
+          <div className="flex flex-wrap items-center gap-0.5">
+            <LayoutGroup>
+              {categories.map((c) => (
+                <button key={c} onClick={() => setFilter(c)} className={`relative isolate rounded-full px-3 py-1 text-sm transition-colors ${filter === c ? "text-bg" : "text-muted hover:text-fg"}`}>
+                  {filter === c && <motion.span layoutId="filter-pill" className="absolute inset-0 -z-10 rounded-full bg-fg" transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
+                  {c}
+                </button>
+              ))}
+            </LayoutGroup>
+          </div>
+        </div>
+
+        <div className="absolute inset-0" style={{ perspective: "1100px", transformStyle: "preserve-3d" }}>
+          {shown.map((project, i) => (
+            <div
+              key={project.id}
+              ref={(el) => {
+                cards.current[i] = el;
+              }}
+              className="absolute left-1/2 top-[46%] w-[min(88vw,62vh*1.6,60rem)] will-change-transform"
+            >
+              <button
+                onClick={() => onOpen(project.id)}
+                aria-label={`Open the ${project.name} case file`}
+                className="group relative block aspect-[16/10] w-full overflow-hidden rounded-2xl bg-bg-2 text-left shadow-[0_40px_120px_-30px_rgb(0_0_0/0.9),0_0_0_1px_var(--line)] transition-transform duration-500 ease-out"
+                style={{ transform: "rotateY(calc(var(--tx, 0) * 1deg)) rotateX(calc(var(--ty, 0) * 1deg))" }}
+              >
+                <Cover project={project} sizes="(max-width: 1024px) 90vw, 60rem" eager />
+                {/* a sheen of light that slides across the glass as the card turns */}
+                <span aria-hidden className="pointer-events-none absolute inset-0 z-10 mix-blend-soft-light" style={{ background: "radial-gradient(40rem circle at var(--sx, 50%) var(--sy, 30%), rgb(255 255 255 / 0.45), transparent 60%)" }} />
+                <span className="absolute inset-0 grid place-items-center bg-black/0 transition-colors duration-300 group-hover:bg-black/35">
+                  <span className="translate-y-2 rounded-full bg-fg px-4 py-2 text-sm font-medium text-bg opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                    Open case file
+                  </span>
+                </span>
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div className="absolute inset-x-0 bottom-0 z-[200] flex items-end justify-between gap-6 bg-gradient-to-t from-bg via-bg/70 to-transparent px-5 pb-14 pt-16 sm:px-8 md:pb-12 lg:px-10">
+          {p && (
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div key={p.id} className="min-w-0" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.22 }}>
+                <p className="font-mono text-xs text-accent">
+                  {String(current + 1).padStart(2, "0")} / {String(shown.length).padStart(2, "0")} · {p.type}
+                </p>
+                <h3 className="poster mt-1 text-[clamp(1.9rem,5vw,4.5rem)]">{p.name}</h3>
+              </motion.div>
+            </AnimatePresence>
+          )}
+          <div className="flex shrink-0 items-center gap-4">
+            <CaseCounter />
+            {p && (
+              <button onClick={() => onOpen(p.id)} aria-label={`Open the ${p.name} case file`} className="btn max-sm:!px-3">
+                <span className="hidden sm:inline">Case file</span> <ArrowRight className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -80,113 +179,30 @@ function CaseCounter() {
   const opened = useLoop((s) => s.projectsOpened.length);
   if (!hydrated) return null;
   return (
-    <span className="ml-auto font-mono text-xs text-muted">
-      case files opened: <span className="text-accent">{opened}</span>/{projects.length}
+    <span className="hidden font-mono text-xs text-muted md:block">
+      {opened}/{projects.length} opened
     </span>
   );
 }
 
-function ProjectCard({ project: p, index, delay, onOpen }: { project: Project; index: number; delay: number; onOpen: () => void }) {
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
-  const opened = useLoop((s) => s.projectsOpened.includes(p.id));
-  const hydrated = useHydrated();
-
-  return (
-    <motion.article
-      layout
-      initial={{ opacity: 0, y: 30, scale: 0.96 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.92 }}
-      transition={{ duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] }}
-      className={p.featured ? "lg:col-span-2" : ""}
-      style={{ perspective: 1200 }}
-    >
-      <div
-        role="button"
-        tabIndex={0}
-        onClick={onOpen}
-        onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), onOpen())}
-        onPointerMove={(e) => {
-          trackSpotlight(e);
-          if (e.pointerType !== "mouse") return;
-          const r = e.currentTarget.getBoundingClientRect();
-          setTilt({ x: ((e.clientY - r.top) / r.height - 0.5) * -6, y: ((e.clientX - r.left) / r.width - 0.5) * 8 });
-        }}
-        onPointerLeave={() => setTilt({ x: 0, y: 0 })}
-        className="card spotlight group flex h-full cursor-pointer flex-col overflow-hidden transition-[transform,border-color] duration-300 ease-out hover:border-accent/40"
-        style={{ transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)` }}
-      >
-        <ProjectCover project={p} index={index} tall={p.featured} />
-        <div className="flex flex-1 flex-col p-6">
-          <div className="mb-2 flex items-center justify-between gap-2 font-mono text-[11px] uppercase tracking-[0.15em] text-muted">
-            <span>{p.type}</span>
-            {hydrated && opened && <span className="text-accent">✓ read</span>}
-          </div>
-          <h3 className="font-display text-2xl font-bold tracking-tight">{p.name}</h3>
-          <p className="mt-2 text-sm text-muted">{p.tagline}</p>
-          {p.tech.length > 0 && (
-            <ul className="mt-4 flex flex-wrap gap-1.5">
-              {p.tech.slice(0, p.featured ? 6 : 3).map((t) => (
-                <li key={t} className="rounded-md bg-surface-2 px-2 py-0.5 font-mono text-[11px] text-muted">
-                  {t}
-                </li>
-              ))}
-              {p.tech.length > (p.featured ? 6 : 3) && (
-                <li className="rounded-md px-1 py-0.5 font-mono text-[11px] text-muted">+{p.tech.length - (p.featured ? 6 : 3)}</li>
-              )}
-            </ul>
-          )}
-          <div className="mt-auto flex items-center justify-between pt-6 text-sm">
-            <span className="flex items-center gap-1.5 font-medium text-fg transition-colors group-hover:text-accent">
-              Open case file <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </span>
-            {p.url && (
-              <a
-                href={p.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="flex items-center gap-1 text-xs text-muted transition hover:text-fg"
-              >
-                live <ArrowUpRight className="h-3.5 w-3.5" />
-              </a>
-            )}
-          </div>
-        </div>
-      </div>
-    </motion.article>
-  );
-}
-
-function ProjectCover({ project: p, index, tall }: { project: Project; index: number; tall?: boolean }) {
+function Cover({ project: p, sizes, priority, eager }: { project: Project; sizes: string; priority?: boolean; eager?: boolean }) {
+  if (p.shot) {
+    return <Image src={p.shot} alt={`${p.name}, ${p.type.toLowerCase()}`} fill sizes={sizes} preload={priority} loading={eager ? "eager" : undefined} className="object-cover object-top" />;
+  }
   const Icon = ICONS[p.icon];
-  const [a, b] = p.colors;
+  const { bg, fg } = p.poster ?? { bg: "#0c1118", fg: "#e9eef6" };
   return (
-    <div
-      className={`relative overflow-hidden ${tall ? "aspect-[16/9] lg:aspect-[21/9]" : "aspect-[16/9]"}`}
-      style={{
-        background: `radial-gradient(120% 120% at 0% 0%, ${a}55, transparent 55%), radial-gradient(120% 120% at 100% 100%, ${b}66, transparent 55%), var(--bg-2)`,
-      }}
-    >
-      <div className="grid-bg absolute inset-0 opacity-60" />
-      {/* faux browser bar */}
-      <div className="absolute inset-x-4 top-4 flex items-center gap-2 rounded-lg border border-white/10 bg-black/30 px-3 py-1.5 backdrop-blur">
-        <span className="h-2 w-2 rounded-full bg-white/30" />
-        <span className="h-2 w-2 rounded-full bg-white/30" />
-        <span className="h-2 w-2 rounded-full bg-white/30" />
-        <span className="ml-2 truncate font-mono text-[10px] text-white/70">{domainOf(p.url)}</span>
-      </div>
-      {/* orbiting rings */}
-      <div className="absolute left-1/2 top-[58%] h-56 w-56 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 transition-transform duration-1000 group-hover:scale-125" />
-      <div className="absolute left-1/2 top-[58%] h-36 w-36 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/15 transition-transform duration-1000 group-hover:scale-150" />
-      <div
-        className="absolute left-1/2 top-[58%] grid h-20 w-20 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-2xl text-white shadow-2xl transition-transform duration-500 group-hover:-translate-y-[60%] group-hover:rotate-6 group-hover:scale-110"
-        style={{ background: `linear-gradient(135deg, ${a}, ${b})`, boxShadow: `0 20px 60px -10px ${b}` }}
-      >
-        {Icon && <Icon className="h-9 w-9" strokeWidth={1.6} />}
-      </div>
-      <span className="absolute bottom-3 right-4 font-display text-5xl font-extrabold text-white/10">{String(index + 1).padStart(2, "0")}</span>
-    </div>
+    <span className="absolute inset-0 flex flex-col justify-between overflow-hidden p-[5cqw] [container-type:size]" style={{ background: bg, color: fg }}>
+      <span className="relative z-10 max-w-[70%] text-[max(0.85rem,1.9cqw)] font-medium leading-snug opacity-80">{p.tagline}</span>
+      {Icon && <Icon aria-hidden strokeWidth={0.6} className="absolute -right-[4cqw] -top-[8cqh] h-[62cqh] w-[62cqh] opacity-20" />}
+      <span className="poster relative z-10 text-[min(13cqw,32cqh)]">
+        {p.name.split(" ").map((w) => (
+          <span key={w} className="block">
+            {w}
+          </span>
+        ))}
+      </span>
+    </span>
   );
 }
 
@@ -214,29 +230,29 @@ function ProjectDrawer({ id, onClose, onNavigate }: { id: string; onClose: () =>
   if (!p) return null;
 
   return (
-    <motion.div className="fixed inset-0 z-[90] flex justify-end" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-      <div className="absolute inset-0 bg-bg/70 backdrop-blur-sm" onClick={onClose} />
+    <motion.div className="fixed inset-0 z-[300] flex justify-end" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
       <motion.aside
         role="dialog"
         aria-label={`${p.name} case file`}
         initial={{ x: "100%" }}
         animate={{ x: 0 }}
         exit={{ x: "100%" }}
-        transition={{ type: "spring", stiffness: 260, damping: 32 }}
-        className="relative flex h-full w-full max-w-2xl flex-col overflow-hidden border-l border-line bg-bg"
+        transition={{ type: "tween", duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="relative flex h-full w-full max-w-2xl flex-col overflow-hidden border-l border-line bg-bg-2 text-fg shadow-2xl"
       >
         <div className="flex items-center justify-between border-b border-line px-5 py-3">
-          <span className="font-mono text-xs uppercase tracking-[0.2em] text-muted">
-            Case file {String(idx + 1).padStart(2, "0")} / {String(projects.length).padStart(2, "0")}
+          <span className="eyebrow">
+            Case file {idx + 1} / {projects.length}
           </span>
           <div className="flex items-center gap-1">
-            <button onClick={() => onNavigate(prev.id)} className="grid h-9 w-9 place-items-center rounded-lg hover:bg-surface-2" aria-label="Previous project">
+            <button onClick={() => onNavigate(prev.id)} className="grid h-9 w-9 place-items-center rounded-md hover:bg-surface-2" aria-label="Previous project">
               <ArrowLeft className="h-4 w-4" />
             </button>
-            <button onClick={() => onNavigate(next.id)} className="grid h-9 w-9 place-items-center rounded-lg hover:bg-surface-2" aria-label="Next project">
+            <button onClick={() => onNavigate(next.id)} className="grid h-9 w-9 place-items-center rounded-md hover:bg-surface-2" aria-label="Next project">
               <ArrowRight className="h-4 w-4" />
             </button>
-            <button onClick={onClose} className="ml-1 grid h-9 w-9 place-items-center rounded-lg bg-surface-2 hover:bg-accent hover:text-on-accent" aria-label="Close">
+            <button onClick={onClose} className="ml-1 grid h-9 w-9 place-items-center rounded-md bg-fg text-bg" aria-label="Close">
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -245,34 +261,31 @@ function ProjectDrawer({ id, onClose, onNavigate }: { id: string; onClose: () =>
         <AnimatePresence mode="wait">
           <motion.div
             key={p.id}
-            initial={{ opacity: 0, x: 30 }}
+            data-lenis-prevent
+            initial={{ opacity: 0, x: 24 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -30 }}
-            transition={{ duration: 0.3 }}
-            className="group flex-1 overflow-y-auto"
+            exit={{ opacity: 0, x: -24 }}
+            transition={{ duration: 0.25 }}
+            className="flex-1 overflow-y-auto"
           >
-            <ProjectCover project={p} index={idx} />
-            <div className="p-6 sm:p-8">
-              <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">{p.type}</p>
-              <h3 className="mt-2 font-display text-4xl font-bold tracking-tight sm:text-5xl">{p.name}</h3>
-              <p className="mt-4 text-lg leading-relaxed text-muted">{p.overview}</p>
+            <div className="relative aspect-[16/10] overflow-hidden bg-bg">
+              <Cover project={p} sizes="(max-width: 768px) 100vw, 42rem" priority />
+            </div>
+            <div className="p-6 sm:p-10">
+              <p className="text-muted">{p.type}</p>
+              <h3 className="poster mt-1 text-[clamp(2.4rem,5vw,3.5rem)]">{p.name}</h3>
+              <p className="mt-5 text-lg leading-relaxed">{p.overview}</p>
 
               {p.url && (
-                <a
-                  href={p.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-6 inline-flex items-center gap-2 rounded-full bg-fg px-5 py-3 text-sm font-semibold text-bg transition hover:scale-[1.03]"
-                >
+                <a href={p.url} target="_blank" rel="noopener noreferrer" className="btn mt-7">
                   Visit {domainOf(p.url)} <ArrowUpRight className="h-4 w-4" />
                 </a>
               )}
 
-              <h4 className="mb-4 mt-10 font-mono text-xs uppercase tracking-[0.2em] text-muted">Key features</h4>
-              <ul className="grid gap-2.5 sm:grid-cols-2">
+              <h4 className="eyebrow mb-2 mt-10">Key features</h4>
+              <ul>
                 {p.features.map((f) => (
-                  <li key={f} className="flex gap-2.5 rounded-xl border border-line bg-surface p-3 text-sm">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+                  <li key={f} className="border-t border-line py-2">
                     {f}
                   </li>
                 ))}
@@ -280,11 +293,10 @@ function ProjectDrawer({ id, onClose, onNavigate }: { id: string; onClose: () =>
 
               {p.roadmap && (
                 <>
-                  <h4 className="mb-4 mt-8 font-mono text-xs uppercase tracking-[0.2em] text-muted">On the roadmap</h4>
-                  <ul className="grid gap-2.5 sm:grid-cols-2">
+                  <h4 className="eyebrow mb-2 mt-10">On the roadmap</h4>
+                  <ul>
                     {p.roadmap.map((f) => (
-                      <li key={f} className="flex gap-2.5 rounded-xl border border-dashed border-line p-3 text-sm text-muted">
-                        <Clock className="mt-0.5 h-4 w-4 shrink-0 text-accent-2" />
+                      <li key={f} className="border-t border-dashed border-line py-2 text-muted">
                         {f}
                       </li>
                     ))}
@@ -294,33 +306,24 @@ function ProjectDrawer({ id, onClose, onNavigate }: { id: string; onClose: () =>
 
               {p.contribution && (
                 <>
-                  <h4 className="mb-3 mt-8 font-mono text-xs uppercase tracking-[0.2em] text-muted">My contribution</h4>
-                  <p className="text-sm leading-relaxed">{p.contribution}</p>
+                  <h4 className="eyebrow mb-2 mt-10">My contribution</h4>
+                  <p className="leading-relaxed">{p.contribution}</p>
                 </>
               )}
 
               {p.tech.length > 0 && (
                 <>
-                  <h4 className="mb-4 mt-8 font-mono text-xs uppercase tracking-[0.2em] text-muted">Built with</h4>
-                  <ul className="flex flex-wrap gap-2">
-                    {p.tech.map((t) => (
-                      <li key={t} className="rounded-full border border-line px-3 py-1 font-mono text-xs">
-                        {t}
-                      </li>
-                    ))}
-                  </ul>
+                  <h4 className="eyebrow mb-2 mt-10">Built with</h4>
+                  <p className="font-mono text-sm leading-loose">{p.tech.join(" · ")}</p>
                 </>
               )}
 
-              <button
-                onClick={() => onNavigate(next.id)}
-                className="mt-12 flex w-full items-center justify-between rounded-2xl border border-line p-5 text-left transition hover:border-accent"
-              >
+              <button onClick={() => onNavigate(next.id)} className="group/next mt-12 flex w-full items-end justify-between border-t border-line pt-5 text-left">
                 <span>
-                  <span className="block font-mono text-[10px] uppercase tracking-[0.2em] text-muted">Next case file</span>
-                  <span className="font-display text-xl font-semibold">{next.name}</span>
+                  <span className="eyebrow block">Next up</span>
+                  <span className="poster mt-1 block text-3xl">{next.name}</span>
                 </span>
-                <ArrowRight className="h-5 w-5 text-accent" />
+                <ArrowRight className="mb-1 h-5 w-5 transition-transform group-hover/next:translate-x-1" />
               </button>
             </div>
           </motion.div>

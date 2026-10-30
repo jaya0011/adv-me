@@ -1,113 +1,78 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
-import { useState } from "react";
+import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "motion/react";
+import { useRef, useState } from "react";
 import { skillGroups } from "@/data/portfolio";
-import { sfx } from "@/lib/store";
-import { Reveal, SectionHeading } from "../ui/Reveal";
+import { worldState } from "@/lib/scroll";
+import { Eyebrow, RiseWords } from "../ui/Reveal";
 
 export function Skills() {
+  const ref = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
-  const group = skillGroups[active];
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
+
+  useMotionValueEvent(scrollYProgress, "change", (p) => {
+    const i = Math.min(skillGroups.length - 1, Math.floor(p * skillGroups.length));
+    worldState.layer = i;
+    setActive(i);
+  });
+
+  const g = skillGroups[active];
 
   return (
-    <section id="skills" className="relative mx-auto max-w-site px-4 py-28 sm:px-6 md:py-36 lg:px-10">
-      <SectionHeading
-        index="02"
-        kicker="Skills"
-        title={
-          <>
-            One developer, <span className="text-gradient">the whole stack.</span>
-          </>
-        }
-        sub="Pick a category and its skills move into orbit. Hover the orbit to pause it."
-      />
+    <section ref={ref} id="skills" data-chapter="skills" className="relative lg:h-[520vh]">
+      {/* Desktop: pinned, the camera descends the plates while one layer of text answers it. */}
+      <div className="sticky top-0 mx-auto hidden h-[100svh] max-w-site items-center px-10 lg:flex">
+        <div className="w-[46%]">
+          <Eyebrow numeral="III">The stack</Eyebrow>
+          <h2 className="poster mt-5 text-[clamp(2.6rem,4.8vw,4.8rem)]">
+            <RiseWords text={["One", "developer,"]} />
+            <RiseWords text={[<span key="m" className="mark">the whole stack.</span>]} delay={0.15} />
+          </h2>
 
-      <div className="grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr]">
-        <Reveal>
-          <div className="flex flex-col gap-2" role="tablist" aria-label="Skill categories">
-            {skillGroups.map((g, i) => (
-              <button
-                key={g.id}
-                role="tab"
-                aria-selected={i === active}
-                onClick={() => {
-                  setActive(i);
-                  sfx("click");
-                }}
-                className={`group relative flex items-center gap-4 rounded-2xl border px-5 py-4 text-left transition-all ${
-                  i === active ? "border-accent/50 bg-accent/10" : "border-line bg-surface hover:border-line hover:bg-surface-2"
-                }`}
-              >
-                <span className="text-2xl">{g.emoji}</span>
-                <span className="flex-1">
-                  <span className="block font-display text-lg font-semibold">{g.label}</span>
-                  <span className="block text-sm text-muted">{g.blurb}</span>
-                </span>
-                <span className={`font-mono text-xs ${i === active ? "text-accent" : "text-muted"}`}>
-                  {String(g.skills.length).padStart(2, "0")}
-                </span>
-              </button>
+          <ol className="mt-9 flex items-center gap-2" aria-hidden>
+            {skillGroups.map((s, i) => (
+              <li key={s.id} className={`h-px flex-1 transition-colors duration-300 ${i <= active ? "bg-accent" : "bg-line"}`} />
             ))}
-          </div>
-        </Reveal>
+          </ol>
 
-        <Reveal delay={0.1}>
-          <div className="orbit relative mx-auto aspect-square w-[80%] max-w-[520px] sm:w-full [container-type:inline-size]">
-            {/* rings */}
-            <div className="absolute inset-[4%] rounded-full border border-dashed border-line" />
-            <div className="absolute inset-[20%] rounded-full border border-line" />
-            <div className="absolute inset-[34%] rounded-full bg-gradient-to-br from-accent/20 to-accent-3/10 blur-2xl" />
-
-            {/* core */}
-            <div className="absolute inset-[34%] grid place-items-center rounded-full border border-line bg-bg-2/80 text-center backdrop-blur">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={group.id}
-                  initial={{ opacity: 0, scale: 0.7 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.7 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <div className="text-4xl">{group.emoji}</div>
-                  <div className="mt-1 font-display text-sm font-bold sm:text-base">{group.label}</div>
-                </motion.div>
-              </AnimatePresence>
-            </div>
-
-            {/* orbiting skills */}
-            <AnimatePresence mode="popLayout">
-              <motion.div
-                key={group.id}
-                className="absolute inset-0"
-                initial={{ opacity: 0, scale: 0.6, rotate: -40 }}
-                animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                exit={{ opacity: 0, scale: 1.2 }}
-                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <div className="orbit-spin absolute inset-0">
-                  {group.skills.map((s, i) => {
-                    const angle = (360 / group.skills.length) * i - 90;
-                    const radius = i % 2 === 0 ? 40 : 31;
-                    return (
-                      <div
-                        key={s}
-                        className="absolute left-1/2 top-1/2"
-                        style={{ transform: `rotate(${angle}deg) translateX(${radius}cqw) rotate(${-angle}deg) translate(-50%, -50%)` }}
-                      >
-                        <div className="orbit-counter">
-                          <span className="block whitespace-nowrap rounded-full border border-line bg-bg/80 px-3 py-1.5 text-xs font-medium shadow-lg backdrop-blur transition hover:scale-110 hover:border-accent hover:text-accent sm:text-sm">
-                            {s}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+          <div className="relative mt-7 min-h-[15rem]">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div key={g.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.25 }}>
+                <p className="font-mono text-xs text-accent">
+                  LAYER {String(active + 1).padStart(2, "0")} / {String(skillGroups.length).padStart(2, "0")}
+                </p>
+                <h3 className="poster mt-2 text-[2.6rem]">{g.label}</h3>
+                <p className="mt-2 text-lg text-muted">{g.blurb}</p>
+                <ul className="mt-4 flex flex-wrap gap-1.5">
+                  {g.skills.map((s) => (
+                    <li key={s} className="rounded-full border border-line px-3 py-1 text-sm">
+                      {s}
+                    </li>
+                  ))}
+                </ul>
               </motion.div>
             </AnimatePresence>
           </div>
-        </Reveal>
+        </div>
+      </div>
+
+      {/* Phones: every layer readable in sequence. */}
+      <div className="px-5 py-20 sm:px-8 lg:hidden">
+        <Eyebrow numeral="III">The stack</Eyebrow>
+        <h2 className="poster mt-5 text-[clamp(2.6rem,9vw,4rem)]">
+          One developer, <span className="mark">the whole stack.</span>
+        </h2>
+        <div className="mt-8 grid gap-3 sm:grid-cols-2">
+          {skillGroups.map((s, i) => (
+            <article key={s.id} className="panel p-5">
+              <p className="font-mono text-xs text-accent">LAYER {String(i + 1).padStart(2, "0")}</p>
+              <h3 className="mt-1 text-xl font-medium tracking-[-0.02em]">{s.label}</h3>
+              <p className="mt-1 text-sm text-muted">{s.blurb}</p>
+              <p className="mt-3 text-sm leading-relaxed">{s.skills.join(" · ")}</p>
+            </article>
+          ))}
+        </div>
       </div>
     </section>
   );

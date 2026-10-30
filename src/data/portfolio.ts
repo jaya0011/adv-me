@@ -128,6 +128,9 @@ export type Project = {
   colors: [string, string];
   icon: string;
   featured?: boolean;
+  /** Screenshot in /public/work. Projects without one get a typographic poster. */
+  shot?: string;
+  poster?: { bg: string; fg: string };
 };
 
 export const projects: Project[] = [
@@ -154,6 +157,7 @@ export const projects: Project[] = [
     tech: ["Next.js 15", "React 19", "Tailwind CSS", "Framer Motion", "Three.js", "WordPress", "PHP", "Nodemailer", "DHL Express"],
     colors: ["#e8c26a", "#7c3aed"],
     icon: "Gem",
+    poster: { bg: "#14110b", fg: "#e8c26a" },
     featured: true,
   },
   {
@@ -179,6 +183,7 @@ export const projects: Project[] = [
     tech: ["NestJS", "Next.js", "Expo React Native", "Drizzle ORM", "PostgreSQL"],
     colors: ["#22d3ee", "#2563eb"],
     icon: "Users",
+    shot: "/work/globalhrbook.webp",
     featured: true,
   },
   {
@@ -203,6 +208,7 @@ export const projects: Project[] = [
     tech: ["Node.js", "JavaScript", "Vite", "Tailwind CSS", "jsPDF", "Payment & messaging integrations"],
     colors: ["#a78bfa", "#f472b6"],
     icon: "HeartHandshake",
+    shot: "/work/mendingminds.webp",
     featured: true,
   },
   {
@@ -226,6 +232,7 @@ export const projects: Project[] = [
     tech: ["TypeScript", "React", "Next.js"],
     colors: ["#34d399", "#0ea5e9"],
     icon: "GraduationCap",
+    shot: "/work/firstrank.webp",
   },
   {
     id: "brobuzz",
@@ -244,6 +251,7 @@ export const projects: Project[] = [
     tech: ["Next.js", "AI image processing"],
     colors: ["#f97316", "#ef4444"],
     icon: "Scissors",
+    poster: { bg: "#e8430f", fg: "#fff3e4" },
   },
   {
     id: "gessure",
@@ -258,6 +266,7 @@ export const projects: Project[] = [
     tech: [],
     colors: ["#6366f1", "#06b6d4"],
     icon: "Network",
+    poster: { bg: "#0c7a60", fg: "#eafff6" },
   },
   {
     id: "mrveg",
@@ -279,6 +288,7 @@ export const projects: Project[] = [
     tech: ["WordPress"],
     colors: ["#84cc16", "#f59e0b"],
     icon: "Leaf",
+    shot: "/work/mrveg.webp",
   },
   {
     id: "dentistpitampura",
@@ -302,6 +312,7 @@ export const projects: Project[] = [
       "Built the website in WordPress, including the clinic services, doctor information and patient-facing content.",
     colors: ["#38bdf8", "#14b8a6"],
     icon: "Smile",
+    shot: "/work/dentistpitampura.webp",
   },
   {
     id: "electricmarshmallow",
@@ -322,6 +333,7 @@ export const projects: Project[] = [
     tech: [],
     colors: ["#ec4899", "#8b5cf6"],
     icon: "Clapperboard",
+    shot: "/work/electricmarshmallow.webp",
   },
 ];
 
@@ -336,7 +348,3 @@ export const process = [
   { step: "Improve", desc: "Maintain and add features" },
 ];
 
-export const allTech = [
-  "Next.js", "React", "TypeScript", "Node.js", "NestJS", "PHP", "PostgreSQL", "Drizzle ORM",
-  "React Native", "Expo", "Tailwind CSS", "WordPress", "Three.js", "Framer Motion", "REST APIs", "Git",
-];

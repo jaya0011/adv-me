@@ -54,6 +54,7 @@ function load() {
   try {
     const raw = localStorage.getItem(KEY);
     if (raw) state = { ...DEFAULT_STATE, ...(JSON.parse(raw) as Partial<LoopState>) };
+    if (!THEMES.some((t) => t.id === state.theme)) state = { ...state, theme: DEFAULT_STATE.theme };
   } catch {
     state = DEFAULT_STATE;
   }

@@ -27,6 +27,7 @@ import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState, type ComponentType } from "react";
 import { profile, projects } from "@/data/portfolio";
 import { THEMES, type Theme } from "@/data/themes";
+import { scrollToId } from "@/lib/scroll";
 import { GAMES } from "./games/registry";
 import { NAV_LINKS } from "./Nav";
 import { GitHubIcon, ICONS, InstagramIcon, LinkedInIcon } from "./ui/icons";
@@ -59,7 +60,7 @@ function buildItems(close: () => void): Item[] {
   const { xp, theme, sound } = getLoop();
   const go = (id: string) => () => {
     close();
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    scrollToId(id);
   };
   const ext = (url: string) => () => {
     close();
@@ -99,7 +100,7 @@ function buildItems(close: () => void): Item[] {
       colors: p.colors,
       run: () => {
         close();
-        document.getElementById("work")?.scrollIntoView({ behavior: "smooth" });
+        scrollToId("work");
         window.setTimeout(() => openProject(p.id), 450);
       },
     })),
@@ -193,7 +194,7 @@ export function CommandPalette() {
 
 function Tile({ item, active }: { item: Item; active: boolean }) {
   const Icon = item.icon;
-  const shape = "h-8 w-8 shrink-0 overflow-hidden rounded-lg transition-colors";
+  const shape = "h-8 w-8 shrink-0 overflow-hidden rounded-md transition-colors";
 
   if (item.swatch) {
     return (
@@ -205,11 +206,11 @@ function Tile({ item, active }: { item: Item; active: boolean }) {
     );
   }
 
-  const tone = item.colors ? "text-white" : active ? "border border-transparent bg-accent text-on-accent" : "border border-line bg-surface text-muted";
+  const tone = item.colors ? "text-white" : active ? "border border-transparent bg-fg text-bg" : "border border-line bg-surface text-muted";
   return (
     <span
       className={`grid place-items-center ${shape} ${tone}`}
-      style={item.colors && { background: `linear-gradient(135deg, ${item.colors[0]}, ${item.colors[1]})` }}
+      style={item.colors && { background: item.colors[0], color: "#15191a" }}
     >
       {Icon && <Icon className="h-4 w-4" />}
     </span>
@@ -268,7 +269,7 @@ function Palette({ onClose }: { onClose: () => void }) {
   return (
     <MotionConfig reducedMotion="user">
       <motion.div
-        className="fixed inset-0 z-[120] flex items-start justify-center bg-bg/70 px-4 pt-[10vh] backdrop-blur-sm"
+        className="fixed inset-0 z-[320] flex items-start justify-center bg-black/40 px-4 pt-[10vh]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -283,7 +284,7 @@ function Palette({ onClose }: { onClose: () => void }) {
           exit={{ opacity: 0, y: -10, scale: 0.98 }}
           transition={{ type: "spring", stiffness: 480, damping: 36 }}
           onClick={(e) => e.stopPropagation()}
-          className="glass w-full max-w-[40rem] overflow-hidden rounded-2xl shadow-[0_30px_80px_-24px_rgb(0_0_0/0.55)]"
+          className="w-full max-w-[40rem] overflow-hidden rounded-2xl border border-line bg-bg text-fg shadow-[0_30px_80px_-24px_rgb(0_0_0/0.45)]"
         >
           <div className="relative flex items-center gap-3 px-4">
             <Search className={`h-[18px] w-[18px] shrink-0 transition-colors ${q ? "text-accent" : "text-muted"}`} />
@@ -304,18 +305,19 @@ function Palette({ onClose }: { onClose: () => void }) {
               }}
               onKeyDown={onKeyDown}
               placeholder="Jump, play or switch theme…"
-              className="h-14 min-w-0 flex-1 bg-transparent text-[15px] caret-accent outline-none placeholder:text-muted"
+              className="h-14 min-w-0 flex-1 bg-transparent text-base caret-fg outline-none placeholder:text-muted"
             />
             <button onClick={onClose} aria-label="Close command palette" className={`${KBD} transition-colors hover:border-accent hover:text-fg`}>
               ESC
             </button>
-            <span aria-hidden className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-line via-accent/60 to-line" />
+            <span aria-hidden className="absolute inset-x-0 bottom-0 h-px bg-line" />
           </div>
 
           <motion.div
             ref={listRef}
             layoutScroll
             id="palette-list"
+            data-lenis-prevent
             role="listbox"
             aria-label="Commands"
             className="max-h-[min(52dvh,28rem)] scroll-pb-8 overflow-y-auto overscroll-contain px-2 pb-6 [mask-image:linear-gradient(to_bottom,black_calc(100%-2rem),transparent)] [scrollbar-color:var(--line)_transparent] [scrollbar-width:thin]"
@@ -335,7 +337,7 @@ function Palette({ onClose }: { onClose: () => void }) {
               return (
                 <div key={item.id} role="presentation">
                   {header && (
-                    <p aria-hidden className="px-2 pb-1.5 pt-4 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">
+                    <p aria-hidden className="px-2 pb-1 pt-3 text-xs font-medium text-muted">
                       {header}
                     </p>
                   )}
@@ -354,7 +356,7 @@ function Palette({ onClose }: { onClose: () => void }) {
                     {active && (
                       <motion.span
                         layoutId="palette-pill"
-                        className="absolute inset-0 -z-10 rounded-xl bg-accent/12 ring-1 ring-inset ring-accent/20"
+                        className="absolute inset-0 -z-10 rounded-xl bg-accent/10 ring-1 ring-inset ring-accent/20"
                         transition={{ type: "spring", stiffness: 560, damping: 40 }}
                       />
                     )}

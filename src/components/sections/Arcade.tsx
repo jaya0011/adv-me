@@ -20,9 +20,11 @@ import {
   type GameResult,
 } from "@/lib/store";
 import { GAMES, gameById, type GameProps } from "../games/registry";
-import { Reveal, SectionHeading, trackSpotlight } from "../ui/Reveal";
+import { scrollToId } from "@/lib/scroll";
+import { Eyebrow, Reveal } from "../ui/Reveal";
+import { GameArt } from "./GameArt";
 
-const loading = () => <div className="grid h-80 place-items-center font-mono text-sm text-muted">loading game…</div>;
+const loading = () => <div className="grid h-80 place-items-center font-pixel text-sm uppercase text-muted">loading game…</div>;
 const COMPONENTS: Record<GameId, React.ComponentType<GameProps>> = {
   bugs: dynamic(() => import("../games/BugSmash"), { ssr: false, loading }),
   sprint: dynamic(() => import("../games/SyntaxSprint"), { ssr: false, loading }),
@@ -31,12 +33,14 @@ const COMPONENTS: Record<GameId, React.ComponentType<GameProps>> = {
   dodge: dynamic(() => import("../games/LoopDodge"), { ssr: false, loading }),
 };
 
+const LABEL = "font-pixel text-[11px] uppercase tracking-wide text-muted";
+
 export function Arcade() {
   const [active, setActive] = useState<GameId | null>(null);
 
   useEffect(() => {
     const onPlay = (e: Event) => {
-      document.getElementById("arcade")?.scrollIntoView({ behavior: "smooth" });
+      scrollToId("arcade");
       setActive((e as CustomEvent<GameId>).detail);
     };
     window.addEventListener("loop:play", onPlay);
@@ -44,30 +48,45 @@ export function Arcade() {
   }, []);
 
   return (
-    <section id="arcade" className="relative py-28 md:py-36">
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-transparent via-bg-2/60 to-transparent" />
-      <div className="mx-auto max-w-site px-4 sm:px-6 lg:px-10">
-        <SectionHeading
-          index="05"
-          kicker="The Loop Arcade"
-          title={
-            <>
-              Take a break. <span className="text-gradient">Break a record.</span>
-            </>
-          }
-          sub="Five small games I built for this site. Your scores, XP and achievements are saved in your browser, so you can pick up where you left off. A new daily quest arrives at midnight, and levelling up unlocks new site themes."
-        />
+    <motion.section
+      id="arcade"
+      data-chapter="arcade"
+      className="crt relative z-20 overflow-hidden text-fg"
+      initial="off"
+      whileInView="on"
+      viewport={{ once: true, margin: "0px 0px -35% 0px" }}
+    >
+      {/* The tube warms up: a bright line that opens into a picture. */}
+      <motion.div
+        className="relative mx-auto max-w-site px-5 py-24 sm:px-8 md:py-32 lg:px-10"
+        variants={{
+          off: { scaleY: 0.004, scaleX: 0.5, opacity: 0, filter: "brightness(5)" },
+          on: { scaleY: 1, scaleX: 1, opacity: 1, filter: "brightness(1)" },
+        }}
+        transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <header className="mb-12 max-w-4xl md:mb-16">
+          <Eyebrow numeral="VII">The Loop Arcade</Eyebrow>
+          <h2 className="mt-5 font-pixel text-[clamp(2.1rem,5.4vw,4.75rem)] uppercase leading-[1.05] tracking-[-0.03em]">
+            Take a break.
+            <br />
+            <span className="text-accent">Break a record.</span>
+          </h2>
+          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted">
+            Five small games I built for this site. Your scores, XP and trophies stay in your browser, a new daily quest arrives at midnight, and levelling up unlocks new site themes.
+          </p>
+        </header>
 
-        <div className="grid gap-5 lg:grid-cols-[1fr_1.4fr]">
-          <Reveal>
-            <PlayerCard />
-          </Reveal>
-          <Reveal delay={0.08}>
+        <div className="grid gap-4 lg:grid-cols-12">
+          <Reveal className="lg:col-span-7">
             <DailyQuest onPlay={setActive} />
+          </Reveal>
+          <Reveal delay={0.08} className="lg:col-span-5">
+            <PlayerCard />
           </Reveal>
         </div>
 
-        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {GAMES.map((g, i) => (
             <Reveal key={g.id} delay={i * 0.06}>
               <GameCard id={g.id} onPlay={() => setActive(g.id)} />
@@ -75,18 +94,18 @@ export function Arcade() {
           ))}
         </div>
 
-        <div className="mt-5 grid gap-5 lg:grid-cols-[1.5fr_1fr]">
-          <Reveal>
+        <div className="mt-4 grid gap-4 lg:grid-cols-12">
+          <Reveal className="lg:col-span-7">
             <TrophyRoom />
           </Reveal>
-          <Reveal delay={0.08}>
+          <Reveal delay={0.08} className="lg:col-span-5">
             <ThemeShelf />
           </Reveal>
         </div>
-      </div>
+      </motion.div>
 
       <AnimatePresence>{active && <GameModal key={active} id={active} onClose={() => setActive(null)} />}</AnimatePresence>
-    </section>
+    </motion.section>
   );
 }
 
@@ -99,55 +118,30 @@ function PlayerCard() {
   const pct = s.xp % 100;
 
   return (
-    <div className="card h-full overflow-hidden p-6">
-      <div className="flex items-center gap-5">
-        <div className="relative h-20 w-20 shrink-0">
-          <svg viewBox="0 0 36 36" className="h-full w-full -rotate-90">
-            <circle cx="18" cy="18" r="16" fill="none" stroke="var(--line)" strokeWidth="2.5" />
-            <circle
-              cx="18"
-              cy="18"
-              r="16"
-              fill="none"
-              stroke="url(#xp-grad)"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeDasharray={`${hydrated ? pct : 0} 100`}
-              pathLength={100}
-              className="transition-all duration-1000"
-            />
-            <defs>
-              <linearGradient id="xp-grad">
-                <stop offset="0" stopColor="var(--accent)" />
-                <stop offset="1" stopColor="var(--accent-3)" />
-              </linearGradient>
-            </defs>
-          </svg>
-          <div className="absolute inset-0 grid place-items-center text-center">
-            <div>
-              <div className="font-mono text-[9px] uppercase text-muted">lvl</div>
-              <div className="font-display text-2xl font-bold leading-none">{hydrated ? lvl : "–"}</div>
-            </div>
-          </div>
+    <div className="flex h-full flex-col justify-between gap-6 rounded-xl border border-line p-6">
+      <div>
+        <div className="flex items-baseline justify-between gap-3">
+          <p className={LABEL}>Player one</p>
+          <p className="font-pixel text-sm text-accent">LV {hydrated ? String(lvl).padStart(2, "0") : "--"}</p>
         </div>
-        <div className="min-w-0">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted">Your player card</p>
-          <p className="font-display text-2xl font-bold">{hydrated ? levelTitle(lvl) : "…"}</p>
-          <p className="text-sm text-muted">
-            {hydrated ? `${s.xp} XP · ${100 - pct} XP to level ${lvl + 1}` : "loading your save…"}
-          </p>
+        <p className="poster mt-2 text-3xl">{hydrated ? levelTitle(lvl) : "…"}</p>
+        <div className="mt-4 grid grid-cols-[repeat(20,1fr)] gap-[3px]" aria-hidden>
+          {Array.from({ length: 20 }, (_, i) => (
+            <span key={i} className={`h-3 ${hydrated && i * 5 < pct ? "bg-accent" : "bg-surface-2"}`} />
+          ))}
         </div>
+        <p className="mt-2 text-sm text-muted">{hydrated ? `${s.xp} XP · ${100 - pct} XP to level ${lvl + 1}` : "loading your save…"}</p>
       </div>
-      <dl className="mt-6 grid grid-cols-4 gap-2 text-center">
+      <dl className="grid grid-cols-4 gap-2 border-t border-line pt-4">
         {[
           ["visits", s.visits],
-          ["streak", `${s.streak}🔥`],
+          ["streak", s.streak],
           ["games", plays],
           ["trophies", `${unlocked}/${ACHIEVEMENTS.length}`],
         ].map(([l, v]) => (
-          <div key={l} className="rounded-xl bg-surface-2 px-1 py-2.5">
-            <dd className="font-display text-lg font-bold">{hydrated ? v : "–"}</dd>
-            <dt className="font-mono text-[9px] uppercase tracking-wider text-muted">{l}</dt>
+          <div key={l} className="flex flex-col-reverse gap-1">
+            <dt className={LABEL}>{l}</dt>
+            <dd className="font-pixel text-lg leading-none">{hydrated ? v : "-"}</dd>
           </div>
         ))}
       </dl>
@@ -178,31 +172,21 @@ function DailyQuest({ onPlay }: { onPlay: (id: GameId) => void }) {
   const g = quest ? gameById[quest.game] : null;
 
   return (
-    <div
-      onPointerMove={trackSpotlight}
-      className="spotlight relative h-full overflow-hidden rounded-3xl border border-accent/30 bg-gradient-to-br from-accent/15 via-transparent to-accent-3/10 p-6"
-    >
-      <div className="absolute -right-6 -top-6 text-[9rem] leading-none opacity-10">{g?.emoji ?? "📅"}</div>
-      <div className="relative flex flex-wrap items-center justify-between gap-x-4 gap-y-1 font-mono text-[10px] uppercase tracking-[0.2em]">
-        <span className="text-accent">Daily quest · {today ?? "…"}</span>
-        <span className="text-muted">resets in {countdown}</span>
+    <div className="tone-field flex h-full flex-col justify-between gap-6 rounded-xl bg-bg p-6 text-fg md:p-8">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 font-pixel text-[11px] uppercase tracking-wide">
+        <span>Daily quest · {today ?? "…"}</span>
+        <span>resets in {countdown}</span>
       </div>
-      <p className="mt-5 max-w-md font-display text-3xl font-bold leading-tight sm:text-4xl">{quest ? quest.label : "Loading today's quest…"}</p>
-      <p className="mt-2 text-sm text-muted">Reward: +50 XP and the 📅 Daily Driver trophy. Same quest for everyone today.</p>
-      <div className="mt-6 flex items-center gap-3">
+      <p className="poster max-w-xl text-[clamp(1.9rem,3vw,2.75rem)]">{quest ? quest.label : "Loading today's quest…"}</p>
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
         {done ? (
-          <span className="inline-flex items-center gap-2 rounded-full bg-success/15 px-5 py-3 text-sm font-semibold text-success">
-            ✓ Completed. See you tomorrow!
-          </span>
+          <span className="btn">Completed. See you tomorrow!</span>
         ) : (
-          <button
-            disabled={!quest}
-            onClick={() => quest && onPlay(quest.game)}
-            className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-semibold text-on-accent transition hover:scale-[1.03]"
-          >
+          <button disabled={!quest} onClick={() => quest && onPlay(quest.game)} className="btn">
             <Play className="h-4 w-4 fill-current" /> Play {g?.name ?? ""}
           </button>
         )}
+        <p className="text-sm text-muted">+50 XP and the Daily Driver trophy. Same quest for everyone today.</p>
       </div>
     </div>
   );
@@ -219,28 +203,23 @@ function GameCard({ id, onPlay }: { id: GameId; onPlay: () => void }) {
         sfx("click");
         onPlay();
       }}
-      onPointerMove={trackSpotlight}
-      className="card spotlight group flex h-full w-full flex-col overflow-hidden text-left transition hover:-translate-y-1.5 hover:border-accent/50"
+      className="group flex h-full w-full flex-col overflow-hidden rounded-xl border border-line text-left transition-colors hover:border-accent"
     >
-      <div
-        className="relative grid aspect-[4/3] place-items-center overflow-hidden"
-        style={{ background: `radial-gradient(circle at 30% 20%, ${g.colors[0]}55, transparent 60%), radial-gradient(circle at 80% 90%, ${g.colors[1]}55, transparent 60%)` }}
-      >
-        <div className="grid-bg absolute inset-0 opacity-50" />
-        <span className="relative text-6xl transition-transform duration-500 group-hover:-rotate-12 group-hover:scale-125">{g.emoji}</span>
-        <span className="absolute bottom-3 right-3 grid h-10 w-10 translate-y-2 place-items-center rounded-full bg-fg text-bg opacity-0 transition group-hover:translate-y-0 group-hover:opacity-100">
-          <Play className="h-4 w-4 fill-current" />
+      <div className="scanlines relative aspect-[8/5] overflow-hidden bg-bg-2 text-fg">
+        <GameArt id={id} />
+        <span className="absolute inset-0 grid place-items-center bg-accent font-pixel text-sm uppercase text-on-accent opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+          Press start
         </span>
       </div>
       <div className="flex flex-1 flex-col p-4">
-        <h3 className="font-display text-lg font-bold">{g.name}</h3>
-        <p className="text-xs text-muted">{g.tagline}</p>
-        <div className="mt-auto flex items-center justify-between pt-4 font-mono text-[11px]">
-          <span className="flex items-center gap-1 text-accent">
+        <h3 className="text-lg font-semibold tracking-[-0.02em]">{g.name}</h3>
+        <p className="mt-0.5 text-sm leading-snug text-muted">{g.tagline}</p>
+        <div className="mt-auto flex items-center justify-between gap-2 pt-4 font-pixel text-[11px] uppercase">
+          <span className="flex items-center gap-1.5 text-accent">
             <Trophy className="h-3 w-3" />
             {hydrated && best !== undefined ? `${best} ${g.unit}` : "no score yet"}
           </span>
-          <span className="text-muted">{hydrated ? `${plays}×` : ""}</span>
+          <span className="text-muted">{hydrated ? `${plays}x` : ""}</span>
         </div>
       </div>
     </button>
@@ -252,17 +231,14 @@ function TrophyRoom() {
   const got = useLoop((s) => s.achievements);
   const count = hydrated ? Object.keys(got).length : 0;
   return (
-    <div className="card h-full p-6">
+    <div className="h-full rounded-xl border border-line p-6">
       <div className="mb-5 flex items-center justify-between">
-        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted">Trophy room</p>
-        <p className="font-mono text-xs text-accent">
+        <p className={LABEL}>Trophy room</p>
+        <p className="font-pixel text-sm text-accent">
           {count}/{ACHIEVEMENTS.length}
         </p>
       </div>
-      <div className="mb-5 h-1.5 overflow-hidden rounded-full bg-surface-2">
-        <div className="h-full rounded-full bg-gradient-to-r from-accent via-accent-3 to-accent-2 transition-all duration-1000" style={{ width: `${(count / ACHIEVEMENTS.length) * 100}%` }} />
-      </div>
-      <ul className="grid grid-cols-5 gap-2 sm:grid-cols-10 lg:grid-cols-5 xl:grid-cols-10">
+      <ul className="grid grid-cols-5 gap-1.5 sm:grid-cols-10">
         {ACHIEVEMENTS.map((a) => {
           const has = hydrated && !!got[a.id];
           const hidden = a.secret && !has;
@@ -270,16 +246,14 @@ function TrophyRoom() {
             <li key={a.id} className="group relative">
               <div
                 tabIndex={0}
-                className={`grid aspect-square place-items-center rounded-xl border text-2xl transition ${
-                  has ? "border-accent/40 bg-accent/10" : "border-line bg-surface grayscale"
-                }`}
+                className={`grid aspect-square place-items-center rounded-sm text-2xl transition ${has ? "bg-accent/15 ring-1 ring-accent" : "bg-surface grayscale"}`}
               >
                 <span className={has ? "" : "opacity-30"}>{hidden ? "❔" : a.icon}</span>
               </div>
-              <div className="glass pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 w-48 -translate-x-1/2 rounded-xl p-3 text-center opacity-0 shadow-xl transition group-focus-within:opacity-100 group-hover:opacity-100">
+              <div className="glass pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 w-48 -translate-x-1/2 rounded-md p-3 text-center opacity-0 shadow-xl transition group-focus-within:opacity-100 group-hover:opacity-100">
                 <p className="text-sm font-semibold">{hidden ? "Secret trophy" : a.title}</p>
                 <p className="mt-0.5 text-xs text-muted">{hidden ? "Keep exploring. Some things are hidden." : a.desc}</p>
-                <p className="mt-1 font-mono text-[10px] text-accent">{has ? "✓ unlocked" : `+${a.xp} XP`}</p>
+                <p className="mt-1 font-pixel text-[10px] uppercase text-accent">{has ? "unlocked" : `+${a.xp} XP`}</p>
               </div>
             </li>
           );
@@ -294,35 +268,33 @@ function ThemeShelf() {
   const xp = useLoop((s) => s.xp);
   const current = useLoop((s) => s.theme);
   return (
-    <div className="card h-full p-6">
-      <p className="mb-5 font-mono text-[10px] uppercase tracking-[0.2em] text-muted">Unlockable themes</p>
-      <ul className="flex flex-col gap-2">
+    <div className="h-full rounded-xl border border-line p-6">
+      <p className={`${LABEL} mb-4`}>Unlockable themes</p>
+      <ul className="flex flex-col">
         {THEMES.map((t) => {
           const locked = !hydrated || xp < t.unlockXp;
           return (
-            <li key={t.id}>
+            <li key={t.id} className="border-t border-line first:border-t-0">
               <button
                 disabled={locked}
                 onClick={() => {
                   setTheme(t.id);
                   sfx("click");
                 }}
-                className={`flex w-full items-center gap-3 rounded-xl border p-2.5 text-left transition ${
-                  hydrated && current === t.id ? "border-accent bg-accent/10" : "border-line hover:border-accent/50"
-                } ${locked ? "cursor-not-allowed" : ""}`}
+                className={`flex w-full items-center gap-3 py-2 text-left transition hover:text-accent ${locked ? "cursor-not-allowed text-muted hover:text-muted" : ""}`}
               >
-                <span className="flex h-8 w-14 shrink-0 overflow-hidden rounded-lg border border-line">
+                <span className="flex h-6 w-12 shrink-0 overflow-hidden rounded-sm">
                   {t.swatch.map((c) => (
                     <span key={c} className="flex-1" style={{ background: c }} />
                   ))}
                 </span>
-                <span className="flex-1 text-sm font-semibold">{t.name}</span>
+                <span className="flex-1 font-semibold">{t.name}</span>
                 {locked && t.unlockXp > 0 ? (
-                  <span className="flex items-center gap-1 font-mono text-[11px] text-muted">
+                  <span className="flex items-center gap-1 font-pixel text-[10px] uppercase text-muted">
                     <Lock className="h-3 w-3" /> {t.unlockXp} XP
                   </span>
                 ) : (
-                  hydrated && current === t.id && <span className="font-mono text-[11px] text-accent">active</span>
+                  hydrated && current === t.id && <span className="font-pixel text-[10px] uppercase text-accent">active</span>
                 )}
               </button>
             </li>
@@ -373,48 +345,40 @@ function GameModal({ id, onClose }: { id: GameId; onClose: () => void }) {
   };
 
   return (
-    <motion.div className="fixed inset-0 z-[95] flex items-end justify-center sm:items-center sm:p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-      <div className="absolute inset-0 bg-bg/80 backdrop-blur-md" onClick={onClose} />
+    <motion.div className="fixed inset-0 z-[300] flex items-end justify-center sm:items-center sm:p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+      <div className="absolute inset-0 bg-bg/85" onClick={onClose} />
       <motion.div
         role="dialog"
         aria-label={g.name}
-        initial={{ y: 40, scale: 0.96, opacity: 0 }}
-        animate={{ y: 0, scale: 1, opacity: 1 }}
-        exit={{ y: 40, scale: 0.96, opacity: 0 }}
+        initial={{ y: 40, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: 40, opacity: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="relative flex max-h-[100svh] w-full max-w-3xl flex-col overflow-hidden rounded-t-3xl border border-line bg-bg shadow-2xl sm:max-h-[94vh] sm:rounded-3xl"
+        className="relative flex max-h-[100svh] w-full max-w-3xl flex-col overflow-hidden rounded-t-xl border border-line bg-bg shadow-2xl sm:max-h-[94vh] sm:rounded-xl"
       >
         <div className="flex items-center gap-3 border-b border-line px-5 py-3">
-          <span className="text-2xl">{g.emoji}</span>
           <div className="min-w-0 flex-1">
-            <p className="font-display text-lg font-bold leading-tight">{g.name}</p>
-            <p className="truncate font-mono text-[11px] text-muted">
-              {g.scoreLabel}: {best !== undefined ? `${best} ${g.unit}` : "–"}
+            <p className="font-pixel text-lg uppercase">{g.name}</p>
+            <p className="mt-1 truncate font-pixel text-[10px] uppercase text-muted">
+              {g.scoreLabel}: {best !== undefined ? `${best} ${g.unit}` : "-"}
             </p>
           </div>
-          <button onClick={onClose} className="grid h-9 w-9 place-items-center rounded-lg bg-surface-2 hover:bg-accent hover:text-on-accent" aria-label="Close game">
+          <button onClick={onClose} className="grid h-9 w-9 place-items-center rounded-md bg-surface-2 hover:bg-accent hover:text-on-accent" aria-label="Close game">
             <X className="h-4 w-4" />
           </button>
         </div>
 
         <div className="relative flex-1 overflow-y-auto p-4 sm:p-6">
           <Game key={round} onGameOver={onGameOver} />
-          <p className="mx-auto mt-5 max-w-lg text-center text-xs leading-relaxed text-muted">{g.howTo}</p>
+          <p className="mx-auto mt-5 max-w-lg text-center text-sm leading-relaxed text-muted">{g.howTo}</p>
 
           <AnimatePresence>
             {result && (
-              <motion.div
-                className="absolute inset-0 z-20 grid place-items-center bg-bg/85 p-6 backdrop-blur-md"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <motion.div initial={{ scale: 0.8, y: 20 }} animate={{ scale: 1, y: 0 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="text-center">
-                  <p className="font-mono text-xs uppercase tracking-[0.3em] text-muted">
-                    {result.isRecord ? "🏆 new personal best" : result.firstPlay ? "first score on the board" : "game over"}
-                  </p>
-                  <p className="mt-3 font-display text-7xl font-extrabold">
-                    <span className={result.isRecord ? "text-gradient" : ""}>{result.score}</span>
+              <motion.div className="absolute inset-0 z-20 grid place-items-center bg-bg/95 p-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <motion.div initial={{ scale: 0.85, y: 20 }} animate={{ scale: 1, y: 0 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="text-center">
+                  <p className="font-pixel text-xs uppercase text-muted">{result.isRecord ? "new personal best" : result.firstPlay ? "first score on the board" : "game over"}</p>
+                  <p className="poster mt-4 text-7xl">
+                    <span className={result.isRecord ? "text-accent" : ""}>{result.score}</span>
                     <span className="ml-2 text-2xl text-muted">{g.unit}</span>
                   </p>
                   {id === "sprint" && meta.wpm !== undefined && (
@@ -424,22 +388,18 @@ function GameModal({ id, onClose }: { id: GameId; onClose: () => void }) {
                   )}
                   {id === "dodge" && meta.time !== undefined && <p className="mt-1 font-mono text-xs text-muted">survived {meta.time}s</p>}
                   {id === "memory" && meta.seconds !== undefined && <p className="mt-1 font-mono text-xs text-muted">in {meta.seconds}s</p>}
-                  <div className="mt-5 flex flex-wrap justify-center gap-2 font-mono text-xs">
-                    <span className="rounded-full bg-accent/15 px-3 py-1.5 text-accent">+{result.xp} XP</span>
-                    <span className="rounded-full bg-surface-2 px-3 py-1.5">
+                  <div className="mt-5 flex flex-wrap justify-center gap-2 font-pixel text-[11px] uppercase">
+                    <span className="rounded-sm bg-accent px-3 py-1.5 text-on-accent">+{result.xp} XP</span>
+                    <span className="rounded-sm bg-surface-2 px-3 py-1.5">
                       best: {result.best} {g.unit}
                     </span>
-                    {result.questCompleted && <span className="rounded-full bg-success/15 px-3 py-1.5 text-success">📅 daily quest +50 XP</span>}
+                    {result.questCompleted && <span className="rounded-sm bg-success/20 px-3 py-1.5 text-success">daily quest +50 XP</span>}
                   </div>
                   <div className="mt-8 flex justify-center gap-3">
-                    <button
-                      autoFocus
-                      onClick={again}
-                      className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 font-semibold text-on-accent transition hover:scale-[1.04]"
-                    >
+                    <button autoFocus onClick={again} className="btn">
                       <RotateCcw className="h-4 w-4" /> Play again
                     </button>
-                    <button onClick={onClose} className="rounded-full border border-line px-6 py-3 font-semibold transition hover:border-accent">
+                    <button onClick={onClose} className="btn btn-line">
                       Back to site
                     </button>
                   </div>

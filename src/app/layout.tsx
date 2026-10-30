@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, DM_Sans, JetBrains_Mono } from "next/font/google";
+import { Geist, Instrument_Serif, JetBrains_Mono, Silkscreen } from "next/font/google";
 import "./globals.css";
 
-const bricolage = Bricolage_Grotesque({ variable: "--font-bricolage", subsets: ["latin"] });
-const dmSans = DM_Sans({ variable: "--font-dm", subsets: ["latin"] });
+const geist = Geist({ variable: "--font-geist", subsets: ["latin"] });
+const serif = Instrument_Serif({ variable: "--font-serif", subsets: ["latin"], weight: "400", style: "italic" });
 const jetbrains = JetBrains_Mono({ variable: "--font-jetbrains", subsets: ["latin"] });
+const silkscreen = Silkscreen({ variable: "--font-silkscreen", subsets: ["latin"], weight: "400", preload: false });
 
 export const metadata: Metadata = {
   title: "Jaya Arora · Full-Stack Developer, on loop",
@@ -20,11 +21,11 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#07060f",
+  themeColor: "#05070c",
 };
 
 // Applies the saved theme and intro state before first paint to avoid a flash.
-const bootScript = `(function(){try{var s=JSON.parse(localStorage.getItem('jaya-loop-v1')||'{}');if(s.theme)document.documentElement.dataset.theme=s.theme;if(sessionStorage.getItem('jaya-loop-session'))document.documentElement.classList.add('intro-seen');}catch(e){}})();`;
+const bootScript = `(function(){var d=document.documentElement;d.classList.add('js');try{var s=JSON.parse(localStorage.getItem('jaya-loop-v1')||'{}');if(s.theme&&s.theme!=='paper')d.dataset.theme=s.theme;if(sessionStorage.getItem('jaya-loop-session'))d.classList.add('intro-seen');}catch(e){}})();`;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
@@ -32,12 +33,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       data-theme="nebula"
       suppressHydrationWarning
-      className={`${bricolage.variable} ${dmSans.variable} ${jetbrains.variable} antialiased`}
+      className={`${geist.variable} ${serif.variable} ${jetbrains.variable} ${silkscreen.variable} antialiased`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: bootScript }} />
       </head>
-      <body className="min-h-screen">{children}</body>
+      {/* Browser extensions (ColorZilla, Grammarly…) add attributes to body before hydration. */}
+      <body className="min-h-screen" suppressHydrationWarning>
+        {children}
+      </body>
     </html>
   );
 }

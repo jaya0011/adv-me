@@ -1,16 +1,15 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { confetti } from "@/lib/confetti";
 import { dismissToast, registerVisit, unlock, useLoop, useToasts } from "@/lib/store";
 
 const KONAMI = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a"];
 
-/** Invisible glue: theme sync, visit tracking, secret codes, cursor glow, toasts. */
+/** Invisible glue: theme sync, visit tracking, secret codes, toasts. */
 export function LoopRuntime() {
   const theme = useLoop((s) => s.theme);
-  const glowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -37,33 +36,7 @@ export function LoopRuntime() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  useEffect(() => {
-    if (!window.matchMedia("(pointer: fine)").matches) return;
-    const el = glowRef.current;
-    if (!el) return;
-    let raf = 0;
-    const onMove = (e: PointerEvent) => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        el.style.transform = `translate(${e.clientX - 300}px, ${e.clientY - 300}px)`;
-        el.style.opacity = "1";
-      });
-    };
-    window.addEventListener("pointermove", onMove);
-    return () => window.removeEventListener("pointermove", onMove);
-  }, []);
-
-  return (
-    <>
-      <div
-        ref={glowRef}
-        aria-hidden
-        className="pointer-events-none fixed left-0 top-0 z-0 hidden h-[600px] w-[600px] [@media(pointer:fine)]:block rounded-full opacity-0 transition-opacity duration-700"
-        style={{ background: "radial-gradient(circle, color-mix(in oklab, var(--accent) 9%, transparent), transparent 60%)" }}
-      />
-      <Toasts />
-    </>
-  );
+  return <Toasts />;
 }
 
 function Toasts() {
@@ -80,14 +53,14 @@ function Toasts() {
             exit={{ opacity: 0, x: 60, scale: 0.9 }}
             transition={{ type: "spring", stiffness: 380, damping: 28 }}
             onClick={() => dismissToast(t.id)}
-            className="glass pointer-events-auto flex items-start gap-3 rounded-2xl p-3.5 text-left shadow-2xl"
+            className="pointer-events-auto flex items-start gap-3 rounded-xl border border-line bg-bg p-3.5 text-left text-fg shadow-[0_20px_40px_-20px_rgb(0_0_0/0.4)]"
           >
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-accent/15 text-xl">{t.icon}</span>
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-surface-2 text-xl">{t.icon}</span>
             <span className="min-w-0">
-              <span className="block font-mono text-[10px] uppercase tracking-[0.2em] text-accent">
-                {t.kind === "achievement" ? "Achievement unlocked" : t.kind === "theme" ? "New theme" : "Loop update"}
+              <span className="block text-xs text-muted">
+                {t.kind === "achievement" ? "achievement unlocked" : t.kind === "theme" ? "new theme" : "loop update"}
               </span>
-              <span className="block font-display text-sm font-semibold">{t.title}</span>
+              <span className="block text-sm font-semibold">{t.title}</span>
               {t.desc && <span className="block text-xs text-muted">{t.desc}</span>}
             </span>
           </motion.button>

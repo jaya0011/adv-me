@@ -6,15 +6,17 @@ The portfolio of Jaya Arora, a full-stack and freelance developer. Built with Ne
 
 ```bash
 npm install
-npm run dev      # http://localhost:3000
+npm run dev      # http://localhost:4002
 npm run build    # production build (fully static)
 npm run start
 ```
 
 ## What's inside
 
-- **Hero**: canvas particles flowing around an infinity loop that react to the cursor, plus a visitor counter ("loop #N", day streak).
-- **About / Skills / Work / Services / Contact**: content comes from `src/data/portfolio.ts`. The skills orbit around a core, each project opens as a case file, and the contact brief opens a pre-filled email.
+- **The world**: one WebGL scene behind the whole page (`src/components/world/`). 64,000 particles pour between an ∞, a spark, a stack, a tunnel and a planet's horizon while the camera flies a path set per chapter in `SHOTS`. Solid objects (the core, glass plates, the planet, warp streaks) live in `objects.ts`. Particles part around the cursor. Quality steps itself down on slow devices; add `?quality=high` to hold it at full. Lenis smooths the scrolling.
+- **Intro**: the pencil writes "hello", then the word lands in the hero.
+- **Chapters**: About, Skills, Work, Services, Process and Contact each have their own treatment. Work is a flight past real screenshots; Services is the one daylight chapter; Arcade powers on like a CRT.
+- **Content**: content comes from `src/data/portfolio.ts`. Each project opens as a case file, and the contact brief opens a pre-filled email. Project screenshots live in `public/work/`; a project without a `shot` gets a typographic poster from its `poster` colours.
 - **The Loop Arcade**: five original mini-games in `src/components/games/`:
   - Loop Dodge (orbit the core, dodge the bugs)
   - Bug Smash (30-second bug whacking)

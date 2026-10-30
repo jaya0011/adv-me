@@ -1,67 +1,69 @@
 "use client";
 
-import { process, services } from "@/data/portfolio";
-import { ICONS } from "../ui/icons";
-import { Reveal, SectionHeading, trackSpotlight } from "../ui/Reveal";
+import { ArrowUpRight } from "lucide-react";
+import { motion, useScroll, useTransform } from "motion/react";
+import { useRef } from "react";
+import { services } from "@/data/portfolio";
+import { Eyebrow, Reveal, RiseWords } from "../ui/Reveal";
 
+const TICKER = ["Websites", "Web apps", "Android", "iOS", "WordPress", "Ecommerce", "APIs", "Databases"];
+
+/** The one daylight chapter: after the tunnel, the whole page opens up into paper. */
 export function Services() {
-  return (
-    <section id="services" className="relative mx-auto max-w-site px-4 py-28 sm:px-6 md:py-36 lg:px-10">
-      <SectionHeading
-        index="04"
-        kicker="Services"
-        title={
-          <>
-            What I can <span className="text-gradient">build for you.</span>
-          </>
-        }
-        sub="For businesses, startups and individuals: one developer who can take your project from the first call to launch day and keep it running afterwards."
-      />
+  const ref = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "start start"] });
+  const side = useTransform(scrollYProgress, [0, 1], [9, 0]);
+  const round = useTransform(scrollYProgress, [0, 1], [56, 0]);
+  const clipPath = useTransform([side, round], ([s, r]) => `inset(0 ${s}% 0 ${s}% round ${r}px ${r}px 0 0)`);
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {services.map((s, i) => {
-          const Icon = ICONS[s.icon];
-          return (
-            <Reveal key={s.title} delay={(i % 3) * 0.06}>
-              <div onPointerMove={trackSpotlight} className="card spotlight group h-full p-6 transition hover:-translate-y-1 hover:border-accent/40">
-                <div className="flex items-start justify-between">
-                  <span className="grid h-12 w-12 place-items-center rounded-2xl bg-accent/12 text-accent transition group-hover:scale-110 group-hover:bg-accent group-hover:text-on-accent">
-                    {Icon && <Icon className="h-5 w-5" />}
-                  </span>
-                  <span className="font-mono text-xs text-muted">{String(i + 1).padStart(2, "0")}</span>
-                </div>
-                <h3 className="mt-5 font-display text-xl font-semibold">{s.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted">{s.desc}</p>
-              </div>
-            </Reveal>
-          );
-        })}
-        <Reveal delay={0.12}>
-          <a
-            href="#contact"
-            className="group flex h-full flex-col justify-between rounded-3xl bg-gradient-to-br from-accent via-accent-3 to-accent-2 p-6 text-on-accent transition hover:-translate-y-1"
-          >
-            <span className="font-mono text-xs uppercase tracking-[0.2em] opacity-70">Something else?</span>
-            <span className="mt-8 font-display text-2xl font-bold leading-tight">
-              Tell me what you&apos;re building and I&apos;ll tell you how I&apos;d approach it. →
+  return (
+    <motion.section ref={ref} id="services" data-chapter="services" style={{ clipPath }} className="tone-light relative z-20 bg-bg text-fg">
+      <div aria-hidden className="overflow-hidden border-b border-line py-4">
+        <div className="animate-marquee flex w-max">
+          {[...TICKER, ...TICKER, ...TICKER, ...TICKER].map((t, i) => (
+            <span key={i} className="poster px-6 text-[clamp(1.6rem,3vw,2.6rem)] text-fg/30">
+              {t} <span className="mark ml-10">∞</span>
             </span>
-          </a>
-        </Reveal>
+          ))}
+        </div>
       </div>
 
-      <Reveal className="mt-20">
-        <p className="mb-6 font-mono text-xs uppercase tracking-[0.2em] text-muted">How a project runs</p>
-        <ol className="grid grid-cols-2 gap-px overflow-hidden rounded-3xl border border-line bg-line sm:grid-cols-3 lg:grid-cols-6">
-          {process.map((p, i) => (
-            <li key={p.step} className="group relative bg-bg p-5 transition hover:bg-bg-2">
-              <span className="font-mono text-xs text-accent">{String(i + 1).padStart(2, "0")}</span>
-              <p className="mt-6 font-display text-lg font-semibold">{p.step}</p>
-              <p className="text-xs text-muted">{p.desc}</p>
-              {i === process.length - 1 && <span className="absolute right-4 top-4 text-accent" title="…and back to the start">↺</span>}
+      <div className="mx-auto max-w-site px-5 py-24 sm:px-8 md:py-32 lg:px-10">
+        <Eyebrow numeral="V">Services</Eyebrow>
+        <h2 className="poster mt-5 text-[clamp(3rem,9vw,9.5rem)]">
+          <RiseWords text={["What", "I", "can"]} />
+          <RiseWords text={[<span key="m" className="mark">build for you.</span>]} delay={0.15} />
+        </h2>
+
+        <div className="mt-8 flex flex-wrap items-end justify-between gap-6">
+          <Reveal className="max-w-xl">
+            <p className="text-lg leading-relaxed text-muted">
+              For businesses, startups and individuals: one developer who can take your project from the first call to launch day and keep it running afterwards.
+            </p>
+          </Reveal>
+          <Reveal>
+            <a href="#contact" className="btn group">
+              Start a project
+              <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+            </a>
+          </Reveal>
+        </div>
+
+        <ol className="mt-16 border-t border-line">
+          {services.map((s, i) => (
+            <li key={s.title}>
+              <Reveal y={16}>
+                <div className="group relative grid grid-cols-[2.5rem_1fr] items-baseline gap-x-3 overflow-hidden border-b border-line py-5 md:grid-cols-[4rem_1.1fr_1fr] md:py-6">
+                  <span aria-hidden className="absolute inset-0 origin-bottom scale-y-0 bg-fg transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-y-100" />
+                  <span className="relative pl-1 font-mono text-xs text-muted transition-colors duration-300 group-hover:text-bg/60">{String(i + 1).padStart(2, "0")}</span>
+                  <h3 className="poster relative text-[clamp(1.6rem,3vw,2.75rem)] transition-[color,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-3 group-hover:text-bg">{s.title}</h3>
+                  <p className="relative col-start-2 mt-1 pr-4 text-muted transition-colors duration-300 group-hover:text-bg/75 md:col-start-3 md:mt-0">{s.desc}</p>
+                </div>
+              </Reveal>
             </li>
           ))}
         </ol>
-      </Reveal>
-    </section>
+      </div>
+    </motion.section>
   );
 }

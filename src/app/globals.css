@@ -1,74 +1,57 @@
 @import "tailwindcss";
 
-/* ---------- themes ---------- */
+/* ---------- themes ----------
+   The page is always a night sky: the 3D world sits behind everything and glows through.
+   A theme only changes what the light is made of. */
 :root,
 [data-theme="nebula"] {
-  --bg: #07060f;
-  --bg-2: #0e0b1f;
-  --surface: rgb(255 255 255 / 0.04);
-  --surface-2: rgb(255 255 255 / 0.08);
-  --line: rgb(255 255 255 / 0.1);
-  --fg: #f3f0ff;
-  --muted: #a29dbd;
-  --accent: #a78bfa;
-  --accent-2: #22d3ee;
-  --accent-3: #f472b6;
-  --on-accent: #0b0716;
-  --danger: #fb7185;
-  --success: #4ade80;
-  --hue: 260;
+  --bg: #05070c;
+  --bg-2: #0c1118;
+  --surface: rgb(210 225 245 / 0.05);
+  --surface-2: rgb(210 225 245 / 0.1);
+  --line: rgb(210 225 245 / 0.14);
+  --fg: #e9eef6;
+  --muted: #94a0b2;
+  --accent: #7fdcc0;
+  --accent-2: #ffb26b;
+  --accent-3: #f08fa8;
+  --on-accent: #05120e;
+  --danger: #ff7a6b;
+  --success: #5fd6a8;
+  --hue: 165;
   --blend: lighter;
   color-scheme: dark;
 }
 
-[data-theme="paper"] {
-  --bg: #f6f3ec;
-  --bg-2: #ece6da;
-  --surface: rgb(23 19 31 / 0.035);
-  --surface-2: rgb(23 19 31 / 0.07);
-  --line: rgb(23 19 31 / 0.12);
-  --fg: #17131f;
-  --muted: #5c566b;
-  --accent: #6d28d9;
-  --accent-2: #0e7490;
-  --accent-3: #db2777;
-  --on-accent: #ffffff;
-  --danger: #e11d48;
-  --success: #15803d;
-  --hue: 265;
-  --blend: source-over;
-  color-scheme: light;
-}
-
 [data-theme="sunset"] {
-  --bg: #120707;
-  --bg-2: #1f0c0a;
-  --surface: rgb(255 240 230 / 0.045);
-  --surface-2: rgb(255 240 230 / 0.09);
-  --line: rgb(255 220 200 / 0.12);
-  --fg: #fff3ea;
-  --muted: #c9a99a;
-  --accent: #fb923c;
-  --accent-2: #f43f5e;
-  --accent-3: #facc15;
+  --bg: #0d0705;
+  --bg-2: #1a0f0a;
+  --surface: rgb(255 235 220 / 0.05);
+  --surface-2: rgb(255 235 220 / 0.1);
+  --line: rgb(255 225 205 / 0.15);
+  --fg: #fff1e6;
+  --muted: #c4a899;
+  --accent: #ff8a4c;
+  --accent-2: #ffcf7a;
+  --accent-3: #ff7f8e;
   --on-accent: #1a0905;
-  --danger: #fb7185;
-  --success: #a3e635;
+  --danger: #ff7a8a;
+  --success: #b6e35a;
   --hue: 22;
   --blend: lighter;
   color-scheme: dark;
 }
 
 [data-theme="matrix"] {
-  --bg: #020803;
-  --bg-2: #04140a;
-  --surface: rgb(160 255 190 / 0.04);
-  --surface-2: rgb(160 255 190 / 0.08);
-  --line: rgb(120 255 160 / 0.14);
+  --bg: #030a06;
+  --bg-2: #0a1610;
+  --surface: rgb(160 255 190 / 0.05);
+  --surface-2: rgb(160 255 190 / 0.1);
+  --line: rgb(120 255 160 / 0.16);
   --fg: #d7ffe1;
-  --muted: #6fae82;
-  --accent: #22c55e;
-  --accent-2: #a3e635;
+  --muted: #84ba97;
+  --accent: #5fe39a;
+  --accent-2: #b6f25a;
   --accent-3: #34d399;
   --on-accent: #021006;
   --danger: #f87171;
@@ -79,15 +62,15 @@
 }
 
 [data-theme="aurum"] {
-  --bg: #0b0906;
-  --bg-2: #16120a;
-  --surface: rgb(255 240 200 / 0.04);
-  --surface-2: rgb(255 240 200 / 0.08);
-  --line: rgb(232 194 106 / 0.16);
+  --bg: #090704;
+  --bg-2: #15110a;
+  --surface: rgb(255 240 200 / 0.05);
+  --surface-2: rgb(255 240 200 / 0.1);
+  --line: rgb(224 191 116 / 0.18);
   --fg: #fbf6e9;
-  --muted: #b8a98a;
-  --accent: #e8c26a;
-  --accent-2: #f5e6b8;
+  --muted: #b9ab8d;
+  --accent: #e0bf74;
+  --accent-2: #fff0c8;
   --accent-3: #c08a3e;
   --on-accent: #140f05;
   --danger: #f87171;
@@ -95,6 +78,30 @@
   --hue: 42;
   --blend: lighter;
   color-scheme: dark;
+}
+
+/* Services steps out of the dark entirely: same components, daylight tokens. */
+.tone-light {
+  --bg: #f3f1ea;
+  --bg-2: #e9e6dc;
+  --surface: rgb(12 15 20 / 0.04);
+  --surface-2: rgb(12 15 20 / 0.08);
+  --line: rgb(12 15 20 / 0.14);
+  --fg: #0c0f14;
+  --muted: #5c6470;
+  --accent: #0f6b5c;
+  --on-accent: #ffffff;
+  color-scheme: light;
+}
+
+/* A solid block of the accent: the daily quest ticket. */
+.tone-field {
+  --bg: var(--accent);
+  --bg-2: color-mix(in oklab, var(--accent) 88%, black);
+  --fg: var(--on-accent);
+  --muted: color-mix(in oklab, var(--on-accent) 72%, var(--accent));
+  --line: color-mix(in oklab, var(--on-accent) 22%, transparent);
+  --surface-2: color-mix(in oklab, var(--on-accent) 12%, transparent);
 }
 
 @theme inline {
@@ -111,46 +118,48 @@
   --color-on-accent: var(--on-accent);
   --color-danger: var(--danger);
   --color-success: var(--success);
-  --font-display: var(--font-bricolage);
-  --font-sans: var(--font-dm);
+  --font-display: var(--font-geist);
+  --font-sans: var(--font-geist);
   --font-mono: var(--font-jetbrains);
-  --container-site: 88rem;
+  --font-pixel: var(--font-silkscreen);
+  --container-site: 92rem;
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.875rem;
+  --radius-2xl: 1.125rem;
+  --radius-3xl: 1.5rem;
 }
 
 /* ---------- base ---------- */
 html {
   background: var(--bg);
-  scroll-behavior: smooth;
-  scroll-padding-top: 5rem;
+  scroll-padding-top: 0;
   -webkit-tap-highlight-color: transparent;
 }
 
+/* what Lenis needs from the page */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+
 body {
-  background:
-    radial-gradient(60rem 40rem at 85% -10%, color-mix(in oklab, var(--accent) 18%, transparent), transparent 60%),
-    radial-gradient(50rem 35rem at -10% 30%, color-mix(in oklab, var(--accent-2) 10%, transparent), transparent 60%),
-    radial-gradient(50rem 40rem at 110% 75%, color-mix(in oklab, var(--accent-3) 9%, transparent), transparent 60%),
-    var(--bg);
+  background: var(--bg);
   color: var(--fg);
-  font-family: var(--font-dm), system-ui, sans-serif;
-  transition: background-color 0.5s ease, color 0.5s ease;
+  font-family: var(--font-geist), system-ui, sans-serif;
   overflow-x: clip;
 }
 
-body::before {
-  /* film grain */
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 100;
-  opacity: 0.05;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
 ::selection {
-  background: var(--accent);
-  color: var(--on-accent);
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
 /* layered so utilities like outline-none and rounded-* can still override it */
@@ -158,96 +167,161 @@ body::before {
   :focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 3px;
-    border-radius: 6px;
+    border-radius: 4px;
   }
 }
 
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
 }
 ::-webkit-scrollbar-track {
   background: var(--bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: color-mix(in oklab, var(--accent) 35%, var(--bg));
-  border-radius: 10px;
-  border: 2px solid var(--bg);
+  background: color-mix(in oklab, var(--fg) 20%, var(--bg));
+  border-radius: 8px;
 }
 
 /* ---------- utilities ---------- */
-@utility glass {
-  background: color-mix(in oklab, var(--bg) 82%, transparent);
-  backdrop-filter: blur(16px) saturate(1.4);
-  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+
+/* big, light and airy: lets the world behind it breathe */
+@utility poster {
+  font-family: var(--font-geist), sans-serif;
+  font-weight: 300;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+/* instrument labels */
+@utility eyebrow {
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 11px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+@utility font-hand {
+  font-family: var(--font-serif), serif;
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* frosted panel floating in the world */
+@utility panel {
+  background: color-mix(in srgb, var(--bg-2) 82%, transparent);
+  backdrop-filter: blur(18px) saturate(1.3);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
   border: 1px solid var(--line);
+  border-radius: 1.125rem;
 }
 
-@utility text-gradient {
-  background: linear-gradient(100deg, var(--accent) 0%, var(--accent-3) 45%, var(--accent-2) 100%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: shimmer 8s linear infinite;
-}
-
-@utility text-outline {
-  color: transparent;
-  -webkit-text-stroke: 1.5px color-mix(in oklab, var(--fg) 75%, transparent);
-}
-
-@utility grid-bg {
-  background-image:
-    linear-gradient(var(--line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--line) 1px, transparent 1px);
-  background-size: 44px 44px;
-  mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+@utility glass {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
 }
 
 @utility card {
   position: relative;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 1.5rem;
+  border-radius: 1.125rem;
 }
 
-@utility spotlight {
-  position: relative;
-  isolation: isolate;
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s;
-    background: radial-gradient(
-      420px circle at var(--mx, 50%) var(--my, 50%),
-      color-mix(in oklab, var(--accent) 16%, transparent),
-      transparent 45%
-    );
-    z-index: -1;
+@utility btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.8rem 1.35rem;
+  border-radius: 999px;
+  background: var(--fg);
+  color: var(--bg);
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s, color 0.2s, box-shadow 0.25s;
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 34px -6px var(--accent);
   }
-  &:hover::after {
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+@utility btn-line {
+  background: transparent;
+  color: var(--fg);
+  box-shadow: inset 0 0 0 1px var(--line);
+  &:hover {
+    background: var(--surface-2);
+    box-shadow: inset 0 0 0 1px var(--line);
+  }
+}
+
+/* the italic word in a heading */
+.mark {
+  font-family: var(--font-serif), serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  color: var(--accent);
+}
+
+/* ---------- entrance: hero waits for the intro to leave ---------- */
+.rise {
+  transition:
+    transform 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.9s ease;
+  transition-delay: calc(var(--d, 0) * 1ms);
+}
+html.js:not(.intro-leaving):not(.intro-seen) .rise {
+  opacity: 0;
+  transform: translateY(var(--from, 1.5rem));
+}
+html.js:not(.intro-seen) #hero-hello {
+  visibility: hidden;
+}
+
+/* scroll-lit copy: --p is set from JS, --i is each word's place in the text */
+html.js .lit {
+  opacity: clamp(0.2, calc((var(--p, 0) - var(--i)) * 16 + 0.2), 1);
+}
+@media (prefers-reduced-motion: reduce), (max-width: 1023px) {
+  html.js .lit {
     opacity: 1;
   }
 }
 
-/* ---------- keyframes ---------- */
-@keyframes shimmer {
-  to {
-    background-position: 200% center;
-  }
+/* ---------- arcade: a tube television ---------- */
+.crt {
+  background: #04060a;
+  --bg: #04060a;
+  --bg-2: #0c1016;
 }
+.crt::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  background:
+    repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.18) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at center, transparent 55%, rgb(0 0 0 / 0.5) 100%);
+}
+
+.scanlines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.2) 0 1px, transparent 1px 3px);
+}
+
+/* ---------- keyframes ---------- */
 @keyframes spin {
   to {
     transform: rotate(360deg);
-  }
-}
-@keyframes marquee {
-  to {
-    transform: translateX(-50%);
   }
 }
 @keyframes float {
@@ -293,26 +367,20 @@ body::before {
     transform: translateX(4px);
   }
 }
-@keyframes draw-loop {
-  from {
-    stroke-dashoffset: 1;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
 @keyframes pulse-ring {
   0% {
-    box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 60%, transparent);
+    box-shadow: 0 0 0 0 color-mix(in oklab, currentColor 45%, transparent);
   }
   100% {
-    box-shadow: 0 0 0 14px transparent;
+    box-shadow: 0 0 0 9px transparent;
+  }
+}
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
   }
 }
 
-.animate-marquee {
-  animation: marquee var(--marquee-duration, 40s) linear infinite;
-}
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
@@ -329,19 +397,80 @@ body::before {
   animation: shake 0.3s;
 }
 .animate-pulse-ring {
-  animation: pulse-ring 1.8s ease-out infinite;
+  animation: pulse-ring 2.2s ease-out infinite;
+}
+.animate-marquee {
+  animation: marquee 34s linear infinite;
 }
 
-/* orbit (skills) */
-.orbit-spin {
-  animation: spin var(--orbit-duration, 60s) linear infinite;
+/* the mini game previews */
+@keyframes art-orbit {
+  to {
+    transform: rotate(360deg);
+  }
 }
-.orbit-counter {
-  animation: spin var(--orbit-duration, 60s) linear infinite reverse;
+@keyframes art-pop {
+  0%,
+  100% {
+    transform: scale(0);
+  }
+  12%,
+  40% {
+    transform: scale(1);
+  }
+  52% {
+    transform: scale(0);
+  }
 }
-.orbit:hover .orbit-spin,
-.orbit:hover .orbit-counter {
-  animation-play-state: paused;
+@keyframes art-slide {
+  0%,
+  100% {
+    transform: translateX(-18px);
+  }
+  50% {
+    transform: translateX(18px);
+  }
+}
+@keyframes art-type {
+  from {
+    stroke-dashoffset: 1;
+  }
+  70%,
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes art-flip {
+  0%,
+  35%,
+  100% {
+    transform: scaleX(1);
+  }
+  45%,
+  90% {
+    transform: scaleX(-1);
+  }
+}
+.art-orbit {
+  transform-origin: 80px 50px;
+  animation: art-orbit 3.6s linear infinite;
+}
+.art-pop {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: art-pop 2.4s ease-in-out infinite;
+}
+.art-slide {
+  animation: art-slide 1.8s ease-in-out infinite;
+}
+.art-type {
+  stroke-dasharray: 1;
+  animation: art-type 3.2s steps(14) infinite;
+}
+.art-flip {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: art-flip 4s ease-in-out infinite;
 }
 
 /* memory cards */
@@ -375,6 +504,7 @@ html.intro-seen #loop-intro {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
+    transition-delay: 0ms !important;
     scroll-behavior: auto !important;
   }
 }
